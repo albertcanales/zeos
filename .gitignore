@@ -5,3 +5,6 @@
 !*.lds
 !*.a
 !Makefile
+!.gdbcmd
+!.bochsrc_gdb
+!.bochsrc
