@@ -12,6 +12,9 @@
 Gate idt[IDT_ENTRIES];
 Register    idtR;
 
+void clock_handler();
+void keyboard_handler();
+
 char char_map[] =
 {
   '\0','\0','1','2','3','4','5','6',
@@ -74,6 +77,10 @@ void setTrapHandler(int vector, void (*handler)(), int maxAccessibleFromPL)
 }
 
 
+void clock_routine() {
+  zeos_show_clock();
+}
+
 void setIdt()
 {
   /* Program interrups/exception service routines */
@@ -82,7 +89,8 @@ void setIdt()
   
   set_handlers();
 
-  /* ADD INITIALIZATION CODE FOR INTERRUPT VECTOR */
+  setInterruptHandler(32, clock_handler, 0);
+  // setInterruptHandler(33, keyboard_handler, 0);
 
   set_idt_reg(&idtR);
 }
