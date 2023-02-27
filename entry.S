@@ -82,3 +82,6 @@ ENTRY(keyboard_handler)
       call keyboard_routine
       RESTORE_ALL
       iret
+
+ENTRY(my_page_fault_handler)
+      call my_page_fault_routine

@@ -12,6 +12,7 @@
 Gate idt[IDT_ENTRIES];
 Register    idtR;
 
+void my_page_fault_handler();
 void clock_handler();
 void keyboard_handler();
 
@@ -76,6 +77,41 @@ void setTrapHandler(int vector, void (*handler)(), int maxAccessibleFromPL)
   idt[vector].highOffset      = highWord((DWord)handler);
 }
 
+// Return string of hex representation from int
+void itoh(int a, char *b)
+{
+  char* keys = "0123456789ABCDEF";
+
+  int i, i1;
+  char c;
+
+  if (a==0) { b[0]='0'; b[1]=0; return ;}
+  
+  i=0;
+  while (a>0)
+  {
+    b[i]=keys[a%16];
+    a=a/16;
+    i++;
+  }
+  
+  for (i1=0; i1<i/2; i1++)
+  {
+    c=b[i1];
+    b[i1]=b[i-i1-1];
+    b[i-i1-1]=c;
+  }
+  b[i]=0;
+}
+
+void my_page_fault_routine(unsigned long flags, unsigned long eip) {
+  char seip[16];
+  itoh(eip, seip);
+  printk("\nPage Fault: EIP is 0x");
+  printk(seip);
+  printk("\n");
+  while(1);
+}
 
 void clock_routine() {
   zeos_show_clock();
@@ -100,6 +136,8 @@ void setIdt()
   idtR.limit = IDT_ENTRIES * sizeof(Gate) - 1;
   
   set_handlers();
+
+  setInterruptHandler(14, my_page_fault_handler, 0);
 
   setInterruptHandler(32, clock_handler, 0);
   setInterruptHandler(33, keyboard_handler, 0);
