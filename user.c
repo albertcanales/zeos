@@ -13,7 +13,7 @@ int __attribute__ ((__section__(".text.main")))
 
   int *x = 0;
   
-  int y = *x+2;
+  *x = 'x';
 
   while(1) { }
 }

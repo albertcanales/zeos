@@ -104,10 +104,10 @@ void itoh(int a, char *b)
   b[i]=0;
 }
 
-void my_page_fault_routine(unsigned long flags, unsigned long eip) {
+void my_page_fault_routine(unsigned int error, unsigned int eip) {
   char seip[16];
   itoh(eip, seip);
-  printk("\nPage Fault: EIP is 0x");
+  printk("\nProcess generates a PAGE FAULT exception at EIP :0x");
   printk(seip);
   printk("\n");
   while(1);
