@@ -34,12 +34,14 @@ SYSOBJ = \
 	utils.o \
 	hardware.o \
 	list.o \
+	system_asm.o \
 
 LIBZEOS = -L . -l zeos
 
 #add to USROBJ any object files required to complete the user program
 USROBJ = \
 	libc.o \
+	wrappers.o \
 	# libjp.a \
 
 all:zeos.bin
@@ -61,7 +63,10 @@ bootsect.o: bootsect.s
 bootsect.s: bootsect.S
 	$(CPP) $(ASMFLAGS) -traditional $< -o $@
 
-entry.s: entry.S $(INCLUDEDIR)/asm.h $(INCLUDEDIR)/segment.h
+entry.s: entry.S $(INCLUDEDIR)/asm.h $(INCLUDEDIR)/segment.h $(INCLUDEDIR)/errno.h
+	$(CPP) $(ASMFLAGS) -o $@ $<
+
+system_asm.s: system_asm.S $(INCLUDEDIR)/asm.h
 	$(CPP) $(ASMFLAGS) -o $@ $<
 
 sys_call_table.s: sys_call_table.S $(INCLUDEDIR)/asm.h $(INCLUDEDIR)/segment.h
@@ -76,6 +81,9 @@ io.o:io.c $(INCLUDEDIR)/io.h
 sched.o:sched.c $(INCLUDEDIR)/sched.h
 
 libc.o:libc.c $(INCLUDEDIR)/libc.h
+
+wrappers.s: wrappers.S $(INCLUDEDIR)/asm.h
+	$(CPP) $(ASMFLAGS) -o $@ $<
 
 mm.o:mm.c $(INCLUDEDIR)/types.h $(INCLUDEDIR)/mm.h
 

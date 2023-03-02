@@ -3,3 +3,4 @@
 
 ENTRY (sys_call_table)
 	.long sys_ni_syscall//0
+

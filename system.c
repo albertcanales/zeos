@@ -13,6 +13,7 @@
 #include <utils.h>
 #include <zeos_mm.h> /* TO BE DELETED WHEN ADDED THE PROCESS MANAGEMENT CODE TO BECOME MULTIPROCESS */
 
+void writeMSR(int msr_addr, int msr_topval, int msr_lowval);
 
 int (*usr_main)(void) = (void *) (PAG_LOG_INIT_CODE*PAGE_SIZE);
 unsigned int *p_sys_size = (unsigned int *) KERNEL_START;
@@ -78,6 +79,11 @@ int __attribute__((__section__(".text.main")))
   /* Initialize hardware data */
   setGdt(); /* Definicio de la taula de segments de memoria */
   setIdt(); /* Definicio del vector de interrupcions */
+
+  writeMSR(0x174, 0, __KERNEL_DS);
+  writeMSR(0x175, 0, INITIAL_ESP);
+  writeMSR(0x176, 0, INITIAL_ESP);
+
   setTSS(); /* Definicio de la TSS */
 
   /* Initialize Memory */
