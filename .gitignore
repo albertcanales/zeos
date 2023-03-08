@@ -8,3 +8,4 @@
 !.gdbcmd
 !.bochsrc_gdb
 !.bochsrc
+!include/
