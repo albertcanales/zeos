@@ -13,6 +13,7 @@
 #include <utils.h>
 #include <zeos_mm.h> /* TO BE DELETED WHEN ADDED THE PROCESS MANAGEMENT CODE TO BECOME MULTIPROCESS */
 
+void syscall_handler_sysenter();
 void writeMSR(int msr_addr, int msr_topval, int msr_lowval);
 
 int (*usr_main)(void) = (void *) (PAG_LOG_INIT_CODE*PAGE_SIZE);
@@ -82,7 +83,7 @@ int __attribute__((__section__(".text.main")))
 
   writeMSR(0x174, 0, __KERNEL_DS);
   writeMSR(0x175, 0, INITIAL_ESP);
-  writeMSR(0x176, 0, INITIAL_ESP);
+  writeMSR(0x176, 0, syscall_handler_sysenter);
 
   setTSS(); /* Definicio de la TSS */
 
