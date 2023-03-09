@@ -91,7 +91,7 @@ ENTRY(syscall_handler_sysenter)
       push $__USER_DS
       push %ebp
       pushfl
-      push $__USER_DS
+      push $__USER_CS
       push 4(%ebp)
       SAVE_ALL
       cmpl $0, %eax

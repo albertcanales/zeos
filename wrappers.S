@@ -23,14 +23,14 @@ ENTRY(write)
 write_sysenter_fi:
 	
 	popl %ebp
-	popl %ebx
+	addl $4, %esp
 	popl %edx
 	popl %ecx
-	popl %ebx
+	popl %ebp
 
 	cmpl $0, %eax
 	jge write_fi
-	neg %eax
+	negl %eax
 	movl %eax, errno
 	movl $-1, %eax
 write_fi:
