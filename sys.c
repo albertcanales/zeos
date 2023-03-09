@@ -12,7 +12,10 @@
 #define LECTURA 0
 #define ESCRIPTURA 1
 
-char buff[4096];
+#define MIN(x, y) (((x) < (y)) ? (x) : (y))
+
+# define BUFFER_SIZE 4096
+char buff[BUFFER_SIZE];
 
 int check_fd(int fd, int permissions)
 {
@@ -53,9 +56,14 @@ int sys_write(int fd, void *buffer, int size) {
 	ret = access_ok(VERIFY_READ, buffer, size);
 	if(ret == 0) return -EFAULT;
 
-	// Copy data
-	if(copy_from_user(buffer, buff, size) < 0) return -ENOSPC;
-
-	// Implement service
-	return sys_write_console(buff, size);
+	// Copy data and implement service
+	int written = 0;
+	while(written < size) {
+		int to_read = MIN(size-written, BUFFER_SIZE);
+		copy_from_user(buffer+written, buff, to_read);
+		int bytes = sys_write_console(buff, to_read);
+		written += bytes;
+		if(bytes < to_read) return written;
+	}
+	return written;
 }

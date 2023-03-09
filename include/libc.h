@@ -20,4 +20,8 @@ int fork();
 
 void exit();
 
+void strcpy(char* orig, char* dest);
+
+void perror();
+
 #endif  /* __LIBC_H__ */

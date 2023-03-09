@@ -45,14 +45,15 @@ int strlen(char *a)
   return i;
 }
 
-// Very unsafe memory access
+// Very unsafe memory access, but not for perror
 void strcpy(char* orig, char* dest) {
-  while(!orig)
+  while(*orig != 0)
     *(dest++) = *(orig++);
+  *dest = 0;
 }
 
 void perror() {
-  char buff[1024];
+  char buff[512];
   switch(errno) {
     case EINVAL:
       strcpy("Invalid argument.\n", buff);
