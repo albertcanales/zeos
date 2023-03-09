@@ -41,9 +41,20 @@ int __attribute__ ((__section__(".text.main")))
     buffer3[i] = 'a' + i/4096;
   buffer3[12999] = 0;
 
-  ret = write(1, buffer3, 13000);
+  ret = write(1, buffer3, strlen(buffer3));
   if(ret < 0)
     perror();
 
-  while(1) { }
+  char *buffer4 = "\nThe time is: ";
+  char timestr[10]; 
+
+  while(1) { 
+    int time = gettime();
+    itoa(time,timestr);
+    write(1, buffer4, strlen(buffer4));
+    write(1, timestr, strlen(timestr));
+    write(1, "\n", 2);
+
+    for(int i = 0; i < 1000; i++);
+  }
 }

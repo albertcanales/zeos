@@ -114,6 +114,7 @@ void my_page_fault_routine(unsigned int error, unsigned int eip) {
 }
 
 void clock_routine() {
+  zeos_ticks++;
   zeos_show_clock();
 }
 

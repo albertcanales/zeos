@@ -7,7 +7,8 @@
 #include <mm.h>
 #include <mm_address.h>
 #include <sched.h>
-#include<errno.h>
+#include <errno.h>
+#include <interrupt.h>
 
 #define LECTURA 0
 #define ESCRIPTURA 1
@@ -66,4 +67,8 @@ int sys_write(int fd, void *buffer, int size) {
 		if(bytes < to_read) return written;
 	}
 	return written;
+}
+
+int sys_gettime() {
+	return zeos_ticks;
 }
