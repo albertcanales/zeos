@@ -50,7 +50,7 @@ int sys_write(int fd, void *buffer, int size) {
 	ret = check_fd(fd, ESCRIPTURA);
 	if(ret < 0) return ret;
 	if(size < 0) return -EINVAL;
-	ret = access_ok(VERIFY_READ, buff, size);
+	ret = access_ok(VERIFY_READ, buffer, size);
 	if(ret == 0) return -EFAULT;
 
 	// Copy data

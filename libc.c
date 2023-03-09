@@ -6,6 +6,8 @@
 
 #include <types.h>
 
+#include <errno.h>
+
 int errno;
 
 void itoa(int a, char *b)
@@ -41,5 +43,38 @@ int strlen(char *a)
   while (a[i]!=0) i++;
   
   return i;
+}
+
+// Very unsafe memory access
+void strcpy(char* orig, char* dest) {
+  while(!orig)
+    *(dest++) = *(orig++);
+}
+
+void perror() {
+  char buff[1024];
+  switch(errno) {
+    case EINVAL:
+      strcpy("Invalid argument.\n", buff);
+      break;
+    case EACCES:
+      strcpy("Permission denied.\n", buff);
+      break;
+    case ENOSYS:
+      strcpy("Invalid system call number.\n", buff);
+      break;
+    case EBADF:
+      strcpy("File descriptor in bad state.\n", buff);
+      break;
+    case EFAULT:
+      strcpy("Bad address.\n", buff);
+      break;
+    case ENOSPC:
+      strcpy("No space left on device.\n", buff);
+      break;
+    default:
+      strcpy("Unrecognised error.\n", buff);
+  }
+  write(1, buff, strlen(buff));
 }
 
