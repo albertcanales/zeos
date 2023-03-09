@@ -45,8 +45,10 @@ int __attribute__ ((__section__(".text.main")))
   if(ret < 0)
     perror();
 
-  char *buffer4 = "\nThe time is: ";
-  char timestr[10]; 
+  char *buffer4 = "The time is: ";
+  char timestr[10];
+
+  errno;
 
   while(1) { 
     int time = gettime();
@@ -55,6 +57,6 @@ int __attribute__ ((__section__(".text.main")))
     write(1, timestr, strlen(timestr));
     write(1, "\n", 2);
 
-    for(int i = 0; i < 1000; i++);
+    for(int i = 0; i < 1000000000; i++);
   }
 }
