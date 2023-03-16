@@ -10,6 +10,11 @@
 struct list_head freequeue;
 struct list_head readyqueue;
 
+void writeMSR(int msr_addr, int msr_topval, int msr_lowval);
+void inner_task_switch(union task_union*t);
+void inner_task_switch_asm();
+
+
 union task_union task[NR_TASKS]
   __attribute__((__section__(".data.task")));
 
@@ -79,7 +84,7 @@ void init_sched()
 	for (int i=NR_TASKS-1; i>0; --i)
 		task[i].task.list.prev = &task[i-1].task.list;
 	task[0].task.list.prev = &freequeue;
-} 
+}
 
 struct task_struct* current()
 {
@@ -92,3 +97,13 @@ struct task_struct* current()
   return (struct task_struct*)(ret_value&0xfffff000);
 }
 
+void inner_task_switch(union task_union*t)
+{
+  	writeMSR(0x175, 0, t->task.kernel_esp);
+
+	set_cr3(get_DIR(&t->task));
+
+	inner_task_switch_asm(&current()->kernel_esp); //dirty hack or not so much
+
+
+}
