@@ -74,16 +74,11 @@ void init_task1(void)
 
 void init_sched()
 {
-	freequeue.next = &task[0].task.list;
-	for (int i=0; i<NR_TASKS-1; ++i)
-		task[i].task.list.next = &task[i+1].task.list;
-	task[NR_TASKS-1].task.list.next = &freequeue;
+	INIT_LIST_HEAD(&freequeue);
+	for(int i = 0; i < NR_TASKS; i++)
+		list_add_tail(&task[i].task.list, &freequeue);
 
-
-	freequeue.prev = &task[NR_TASKS-1].task.list;
-	for (int i=NR_TASKS-1; i>0; --i)
-		task[i].task.list.prev = &task[i-1].task.list;
-	task[0].task.list.prev = &freequeue;
+	INIT_LIST_HEAD(&readyqueue);
 }
 
 struct task_struct* current()
@@ -100,10 +95,7 @@ struct task_struct* current()
 void inner_task_switch(union task_union*t)
 {
   	writeMSR(0x175, 0, t->task.kernel_esp);
-
 	set_cr3(get_DIR(&t->task));
 
-	inner_task_switch_asm(&current()->kernel_esp); //dirty hack or not so much
-
-
+	inner_task_switch_asm(&current()->kernel_esp);
 }
