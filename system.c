@@ -11,7 +11,7 @@
 #include <mm.h>
 #include <io.h>
 #include <utils.h>
-#include <zeos_mm.h> /* TO BE DELETED WHEN ADDED THE PROCESS MANAGEMENT CODE TO BECOME MULTIPROCESS */
+// #include <zeos_mm.h> /* TO BE DELETED WHEN ADDED THE PROCESS MANAGEMENT CODE TO BECOME MULTIPROCESS */
 
 int syscall_handler_sysenter();
 void writeMSR(int msr_addr, int msr_topval, int msr_lowval);
@@ -93,7 +93,7 @@ int __attribute__((__section__(".text.main")))
   init_mm();
 
   /* Initialize an address space to be used for the monoprocess version of ZeOS */
-  monoprocess_init_addr_space(); /* TO BE DELETED WHEN THE PROCESS MANAGEMENT CODE TO BECOME MULTIPROCESS IS ADDED */
+  // monoprocess_init_addr_space(); /* TO BE DELETED WHEN THE PROCESS MANAGEMENT CODE TO BECOME MULTIPROCESS IS ADDED */
 
   /* Initialize Scheduling */
   init_sched();
