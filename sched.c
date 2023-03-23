@@ -97,5 +97,5 @@ void inner_task_switch(union task_union*t)
   	writeMSR(0x175, 0, t->task.kernel_esp);
 	set_cr3(get_DIR(&t->task));
 
-	inner_task_switch_asm(&current()->kernel_esp);
+	inner_task_switch_asm(&current()->kernel_esp, &t->task.kernel_esp);
 }
