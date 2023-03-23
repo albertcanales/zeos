@@ -18,12 +18,10 @@ void inner_task_switch_asm();
 union task_union task[NR_TASKS]
   __attribute__((__section__(".data.task")));
 
-#if 0
 struct task_struct *list_head_to_task_struct(struct list_head *l)
 {
   return list_entry( l, struct task_struct, list);
 }
-#endif
 
 extern struct list_head blocked;
 
@@ -69,6 +67,16 @@ void init_idle (void)
 
 void init_task1(void)
 {
+	struct list_head *list_head_init = freequeue.next;
+	struct task_struct *task_init = list_head_to_task_struct(list_head_init);
+	list_del(list_head_init);
+	
+	task_init->PID = 1;
+	allocate_DIR(task_init);
+	set_user_pages(task_init);
+	tss.esp0 = KERNEL_ESP((union task_union*)task_init);
+	writeMSR(0x175, 0, task_init->kernel_esp);
+	set_cr3(get_DIR(task_init));
 }
 
 
@@ -94,6 +102,7 @@ struct task_struct* current()
 
 void inner_task_switch(union task_union*t)
 {
+	tss.esp0 = KERNEL_ESP(t);
   	writeMSR(0x175, 0, t->task.kernel_esp);
 	set_cr3(get_DIR(&t->task));
 
