@@ -87,7 +87,8 @@ void init_task1(void)
 	task_init->PID = 1;
 	allocate_DIR(task_init);
 	set_user_pages(task_init);
-	tss.esp0 = KERNEL_ESP((union task_union*)task_init);
+	task_init->kernel_esp = KERNEL_ESP((union task_union*)task_init);
+	tss.esp0 = task_init->kernel_esp;
 	writeMSR(0x175, 0, task_init->kernel_esp);
 	set_cr3(get_DIR(task_init));
 }
