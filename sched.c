@@ -10,8 +10,6 @@
 struct list_head freequeue;
 struct list_head readyqueue;
 
-struct task_struct *idle_task;
-
 void writeMSR(int msr_addr, int msr_topval, int msr_lowval);
 void inner_task_switch(union task_union*t);
 void inner_task_switch_asm();
@@ -64,7 +62,7 @@ void cpu_idle(void)
 
 void init_idle (void)
 {
-	struct list_head *list_head_idle = freequeue.next;
+	struct list_head *list_head_idle = list_first(&freequeue);
 	idle_task = list_head_to_task_struct(list_head_idle);
 	list_del(list_head_idle);
 
@@ -74,6 +72,7 @@ void init_idle (void)
 	DWord *stack = (DWord*)KERNEL_ESP((union task_union*)idle_task);
 	stack[-1] = (DWord)cpu_idle;
 	stack[-2] = 0;
+	idle_task->kernel_esp = (DWord)&stack[-2];
 
 	// El punt 6 ja està implementat a la línea 2 de la funció
 }
@@ -117,7 +116,7 @@ struct task_struct* current()
 void inner_task_switch(union task_union*t)
 {
 	tss.esp0 = KERNEL_ESP(t);
-  	writeMSR(0x175, 0, t->task.kernel_esp);
+  	writeMSR(0x175, 0, KERNEL_ESP(t));
 	set_cr3(get_DIR(&t->task));
 
 	inner_task_switch_asm(&current()->kernel_esp, &t->task.kernel_esp);

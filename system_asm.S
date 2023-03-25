@@ -32,11 +32,10 @@ ENTRY(task_switch)
       ret 
 
 ENTRY(inner_task_switch_asm)
-      pushl %ebp
-      movl %esp, %ebp
       
-      movl %ebp, 8(%ebp)      // 4.5.2.3
-      movl 12(%ebp), %ebp     // 4.5.2.4
+      movl 4(%esp), %eax
+      movl %ebp, (%eax)       // 4.5.2.3
+      movl 8(%esp), %esp      // 4.5.2.4
 
       popl %ebp
       ret 
