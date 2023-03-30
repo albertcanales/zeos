@@ -1,12 +1,24 @@
 #include <asm.h>
 
-ENTRY(write)
-	pushl %ebp
-	movl %esp, %ebp
-
-	pushl %ebx
-	pushl %edi
+#define INIT_WRAPPER \
+	pushl %ebp; \
+	movl %esp, %ebp; \
+	pushl %ebx; \
+	pushl %edi; \
 	pushl %esi
+
+#define END_WRAPPER \
+	popl %ebp; \
+	addl $4, %esp; \
+	popl %edx; \
+	popl %ecx; \
+	popl %esi; \
+	popl %edi; \
+	popl %ebx; \
+	popl %ebp; \
+
+ENTRY(write)
+	INIT_WRAPPER
 
 	movl 8(%ebp), %ebx
 	movl 12(%ebp), %ecx
@@ -25,17 +37,7 @@ ENTRY(write)
 	sysenter
 
 write_sysenter_fi:
-	
-	popl %ebp
-	addl $4, %esp
-	popl %edx
-	popl %ecx
-
-	popl %esi
-	popl %edi
-	popl %ebx
-
-	popl %ebp
+	END_WRAPPER
 
 	cmpl $0, %eax
 	jge write_fi
@@ -45,13 +47,9 @@ write_sysenter_fi:
 write_fi:
 	ret
 
-ENTRY(gettime)
-	pushl %ebp
-	movl %esp, %ebp
 
-	pushl %ebx
-	pushl %edi
-	pushl %esi
+ENTRY(gettime)
+	INIT_WRAPPER
 
 	movl $10, %eax
 
@@ -67,15 +65,7 @@ ENTRY(gettime)
 
 gettime_sysenter_fi:
 	
-	popl %ebp
-	addl $4, %esp
-	popl %edx
-	popl %ecx
-
-	popl %esi
-	popl %edi
-	popl %ebx
-
-	popl %ebp
+	END_WRAPPER
 	
 	ret
+
