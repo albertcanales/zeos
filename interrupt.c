@@ -12,6 +12,8 @@
 Gate idt[IDT_ENTRIES];
 Register    idtR;
 
+int zeos_ticks;
+
 void my_page_fault_handler();
 void clock_handler();
 void keyboard_handler();

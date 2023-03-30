@@ -14,6 +14,8 @@ void writeMSR(int msr_addr, int msr_topval, int msr_lowval);
 void inner_task_switch(union task_union*t);
 void inner_task_switch_asm();
 
+struct task_struct *idle_task;
+
 
 union task_union task[NR_TASKS]
   __attribute__((__section__(".data.task")));

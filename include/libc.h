@@ -8,7 +8,7 @@
 
 #include <stats.h>
 
-int errno;
+extern int errno;
 
 int write(int fd, char *buffer, int size);
 
