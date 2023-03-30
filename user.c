@@ -56,13 +56,7 @@ int __attribute__ ((__section__(".text.main")))
   itoa(getpid(), pidstr);
   write(1, pidstr, strlen(pidstr));
 
-  while(1) { 
-    int time = gettime();
-    itoa(time,timestr);
-    write(1, buffer4, strlen(buffer4));
-    write(1, timestr, strlen(timestr));
-    write(1, "\n", 2);
+  fork();
 
-    for(int i = 0; i < 1000000000; i++);
-  }
+  while(1);
 }

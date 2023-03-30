@@ -87,3 +87,25 @@ getpid_sysenter_fi:
 	END_WRAPPER
 	ret
 
+ENTRY(fork)
+	INIT_WRAPPER
+
+	movl 8(%ebp), %ebx
+	movl 12(%ebp), %ecx
+	movl 16(%ebp), %edx
+
+	movl $2, %eax
+
+	pushl %ecx
+	pushl %edx
+
+	pushl $fork_sysenter_fi
+
+	pushl %ebp
+	movl %esp, %ebp
+
+	sysenter
+
+fork_sysenter_fi:
+	END_WRAPPER
+	ret

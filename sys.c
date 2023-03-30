@@ -1,6 +1,7 @@
 /*
  * sys.c - Syscalls implementation
  */
+#include "list.h"
 #include <devices.h>
 #include <utils.h>
 #include <io.h>
@@ -37,10 +38,25 @@ int sys_getpid()
 
 int sys_fork()
 {
-  int PID=-1;
+	if (list_empty(&freequeue)) return EAGAIN; // No more PIDs available
+
+	struct list_head * list_head_fork = freequeue.next;
+	struct task_struct * new_task = list_head_to_task_struct(list_head_fork); 
+
+	union task_union * parent_task_union = ((union task_union*)current());
+	union task_union * child_task_union = ((union task_union*)new_task);
+
+	copy_data(current(), new_task, KERNEL_STACK_SIZE);
+
+	allocate_DIR(new_task);
+	int frame = alloc_frame();
+	if (frame == -1) return ENOMEM; // No memory available
+
+	//inherit user 
+	//page_table_entry * = get_PT(new_task);
 
   // creates the child process
-  
+  int PID = 0;
   return PID;
 }
 
