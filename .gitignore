@@ -11,3 +11,4 @@
 !include/
 !flake.nix
 !flake.lock
+!.envrc
