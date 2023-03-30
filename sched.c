@@ -83,7 +83,7 @@ void init_task1(void)
 	struct task_struct *task_init = list_head_to_task_struct(list_head_init);
 	list_del(list_head_init);
 	
-	task_init->PID = 1;
+	task_init->PID = 0;
 	allocate_DIR(task_init);
 	set_user_pages(task_init);
 	task_init->kernel_esp = KERNEL_ESP((union task_union*)task_init);
@@ -115,9 +115,9 @@ struct task_struct* current()
 
 void inner_task_switch(union task_union*t)
 {
-	tss.esp0 = KERNEL_ESP(t);
-  	writeMSR(0x175, 0, KERNEL_ESP(t));
+	tss.esp0 = t->task.kernel_esp;
+  	writeMSR(0x175, 0, t->task.kernel_esp);
 	set_cr3(get_DIR(&t->task));
 
-	inner_task_switch_asm(&current()->kernel_esp, &t->task.kernel_esp);
+	inner_task_switch_asm(current()->kernel_esp, t->task.kernel_esp);
 }
