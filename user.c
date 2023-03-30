@@ -50,6 +50,12 @@ int __attribute__ ((__section__(".text.main")))
 
   errno;
 
+  char *buffer5 = "The PID is: ";
+  write(1, buffer5, strlen(buffer5));
+  char pidstr[10];
+  itoa(getpid(), pidstr);
+  write(1, pidstr, strlen(pidstr));
+
   while(1) { 
     int time = gettime();
     itoa(time,timestr);

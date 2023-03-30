@@ -85,7 +85,7 @@ void init_task1(void)
 	struct task_struct *task_init = list_head_to_task_struct(list_head_init);
 	list_del(list_head_init);
 	
-	task_init->PID = 0;
+	task_init->PID = 1;
 	allocate_DIR(task_init);
 	set_user_pages(task_init);
 	task_init->kernel_esp = KERNEL_ESP((union task_union*)task_init);

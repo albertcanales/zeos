@@ -64,8 +64,26 @@ ENTRY(gettime)
 	sysenter
 
 gettime_sysenter_fi:
-	
 	END_WRAPPER
-	
+	ret
+
+
+ENTRY(getpid)
+	INIT_WRAPPER
+
+	movl $20, %eax
+
+	pushl %ecx
+	pushl %edx
+
+	pushl $getpid_sysenter_fi
+
+	pushl %ebp
+	movl %esp, %ebp
+
+	sysenter
+
+getpid_sysenter_fi:
+	END_WRAPPER
 	ret
 
