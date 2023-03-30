@@ -9,3 +9,5 @@
 !.bochsrc_gdb
 !.bochsrc
 !include/
+!flake.nix
+!flake.lock
