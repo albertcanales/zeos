@@ -41,7 +41,8 @@ int sys_fork()
 	if (list_empty(&freequeue)) return EAGAIN; // No more PIDs available
 
 	struct list_head * list_head_fork = freequeue.next;
-	struct task_struct * new_task = list_head_to_task_struct(list_head_fork); 
+	struct task_struct * new_task = list_head_to_task_struct(list_head_fork);
+	list_del(list_head_fork);
 
 	union task_union * parent_task_union = ((union task_union*)current());
 	union task_union * child_task_union = ((union task_union*)new_task);
@@ -49,15 +50,32 @@ int sys_fork()
 	copy_data(current(), new_task, KERNEL_STACK_SIZE);
 
 	allocate_DIR(new_task);
-	int frame = alloc_frame();
-	if (frame == -1) return ENOMEM; // No memory available
 
-	//inherit user 
-	//page_table_entry * = get_PT(new_task);
+	// Get frames for child
+	int child_pages[NUM_PAG_DATA];
+	for(int i = 0; i < NUM_PAG_DATA; i++) {
+		child_pages[i] = alloc_frame();
+		if (child_pages[i] == -1) {
+			// Free previous resources
+			for(int j = 0; j < i; j++)
+				free_frame(child_pages[j]);
+			list_add_tail(&freequeue, list_head_fork);
+			return ENOMEM;
+		}
+	}
 
-  // creates the child process
-  int PID = 0;
-  return PID;
+	page_table_entry * parent_table_page = get_PT(current());
+	page_table_entry * child_table_page = get_PT(new_task);
+
+	for(int i = 0; i < NUM_PAG_KERNEL; i++)
+		set_ss_pag(child_table_page, i, get_frame(parent_table_page, i));
+
+
+
+
+  	// creates the child process
+	int PID = 0;
+	return PID;
 }
 
 void sys_exit()

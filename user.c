@@ -33,22 +33,15 @@ int __attribute__ ((__section__(".text.main")))
   if(ret < 0)
     perror();
 
-  char *buffer2 = "Aixo es un text molt molt molt llarg\n";
+  char *buffer2 = "Aixo es un text molt molt molt llarg\n\n\n";
   ret = write(1, buffer2, strlen(buffer2));
-
-  char buffer3[13000];
-  for(int i = 0; i < 12999; i++)
-    buffer3[i] = 'a' + i/4096;
-  buffer3[12999] = 0;
-
-  ret = write(1, buffer3, strlen(buffer3));
-  if(ret < 0)
-    perror();
 
   char *buffer4 = "The time is: ";
   char timestr[10];
-
-  errno;
+  itoa(gettime(), timestr);
+  write(1, buffer4, strlen(buffer4));
+  write(1, timestr, strlen(timestr));
+  write(1, "\n", 1);
 
   char *buffer5 = "The PID is: ";
   write(1, buffer5, strlen(buffer5));
