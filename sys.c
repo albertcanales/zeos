@@ -41,15 +41,15 @@ int sys_fork()
 	if (list_empty(&freequeue)) return EAGAIN; // No more PIDs available
 
 	struct list_head * list_head_fork = freequeue.next;
-	struct task_struct * new_task = list_head_to_task_struct(list_head_fork);
+	struct task_struct * child = list_head_to_task_struct(list_head_fork);
 	list_del(list_head_fork);
 
 	union task_union * parent_task_union = ((union task_union*)current());
-	union task_union * child_task_union = ((union task_union*)new_task);
+	union task_union * child_task_union = ((union task_union*)child);
 
-	copy_data(current(), new_task, KERNEL_STACK_SIZE);
+	copy_data(current(), child, KERNEL_STACK_SIZE);
 
-	allocate_DIR(new_task);
+	allocate_DIR(child);
 
 	// Get frames for child
 	int child_pages[NUM_PAG_DATA];
@@ -65,17 +65,29 @@ int sys_fork()
 	}
 
 	page_table_entry * parent_table_page = get_PT(current());
-	page_table_entry * child_table_page = get_PT(new_task);
-
+	page_table_entry * child_table_page = get_PT(child);
+	
+	// Assign logical pages of child
 	for(int i = 0; i < NUM_PAG_KERNEL; i++)
 		set_ss_pag(child_table_page, i, get_frame(parent_table_page, i));
 
+	for(int i = 0; i < NUM_PAG_CODE; i++)
+		set_ss_pag(child_table_page, PAG_LOG_INIT_CODE+i, 
+			get_frame(parent_table_page, PAG_LOG_INIT_CODE+i));
 
+	for(int i = 0; i < NUM_PAG_DATA; i++)
+		set_ss_pag(child_table_page, PAG_LOG_INIT_DATA+i, 
+			child_pages[i]);
 
+	// TODO Copy the Data+Stack from parent to child
 
-  	// creates the child process
-	int PID = 0;
-	return PID;
+	set_cr3(get_DIR(current()));
+
+	// TODO Sections g and h
+
+	list_add_tail(&child->list, &readyqueue);
+
+  	return child->PID;
 }
 
 void sys_exit()
