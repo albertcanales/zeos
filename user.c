@@ -48,8 +48,14 @@ int __attribute__ ((__section__(".text.main")))
   char pidstr[10];
   itoa(getpid(), pidstr);
   write(1, pidstr, strlen(pidstr));
+  write(1, "\n", 1);
 
   fork();
+
+  write(1, buffer5, strlen(buffer5));
+  itoa(getpid(), pidstr);
+  write(1, pidstr, strlen(pidstr));
+  write(1, "\n", 1);
 
   while(1);
 }

@@ -87,9 +87,9 @@ int sys_fork()
 	int SPACE_END = NUM_PAG_KERNEL+NUM_PAG_DATA;
 
 	for(int i = SPACE_START; i < SPACE_END; i++) {
-		set_ss_pag(parent_page_table, i+NUM_PAG_DATA, get_frame(child_page_table, i));
-		copy_data((void *)(i<<12), (void *)((i+NUM_PAG_DATA)<<12), PAGE_SIZE);
-		del_ss_pag(parent_page_table, i+NUM_PAG_DATA);
+		set_ss_pag(parent_page_table, i+NUM_PAG_DATA+NUM_PAG_CODE, get_frame(child_page_table, i));
+		copy_data((void *)(i<<12), (void *)((i+NUM_PAG_DATA+NUM_PAG_CODE)<<12), PAGE_SIZE);
+		del_ss_pag(parent_page_table, i+NUM_PAG_DATA+NUM_PAG_CODE);
 	}
 
 	set_cr3(get_DIR(current()));
