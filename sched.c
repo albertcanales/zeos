@@ -10,6 +10,8 @@
 struct list_head freequeue;
 struct list_head readyqueue;
 
+int next_pid = 3;
+
 void writeMSR(int msr_addr, int msr_topval, int msr_lowval);
 void inner_task_switch(union task_union*t);
 void inner_task_switch_asm();

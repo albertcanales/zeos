@@ -36,6 +36,10 @@ int sys_getpid()
 	return current()->PID;
 }
 
+int ret_from_fork() {
+	return 0;
+}
+
 int sys_fork()
 {
 	if (list_empty(&freequeue)) return EAGAIN; // No more PIDs available
@@ -44,7 +48,6 @@ int sys_fork()
 	struct task_struct * child = list_head_to_task_struct(list_head_fork);
 	list_del(list_head_fork);
 
-	union task_union * parent_task_union = ((union task_union*)current());
 	union task_union * child_task_union = ((union task_union*)child);
 
 	copy_data(current(), child, KERNEL_STACK_SIZE);
@@ -64,29 +67,44 @@ int sys_fork()
 		}
 	}
 
-	page_table_entry * parent_table_page = get_PT(current());
-	page_table_entry * child_table_page = get_PT(child);
+	page_table_entry * parent_page_table = get_PT(current());
+	page_table_entry * child_page_table = get_PT(child);
 	
 	// Assign logical pages of child
 	for(int i = 0; i < NUM_PAG_KERNEL; i++)
-		set_ss_pag(child_table_page, i, get_frame(parent_table_page, i));
+		set_ss_pag(child_page_table, i, get_frame(parent_page_table, i));
 
 	for(int i = 0; i < NUM_PAG_CODE; i++)
-		set_ss_pag(child_table_page, PAG_LOG_INIT_CODE+i, 
-			get_frame(parent_table_page, PAG_LOG_INIT_CODE+i));
+		set_ss_pag(child_page_table, PAG_LOG_INIT_CODE+i, 
+			get_frame(parent_page_table, PAG_LOG_INIT_CODE+i));
 
 	for(int i = 0; i < NUM_PAG_DATA; i++)
-		set_ss_pag(child_table_page, PAG_LOG_INIT_DATA+i, 
+		set_ss_pag(child_page_table, PAG_LOG_INIT_DATA+i, 
 			child_pages[i]);
 
 	// TODO Copy the Data+Stack from parent to child
+	int SPACE_START = NUM_PAG_KERNEL;
+	int SPACE_END = NUM_PAG_KERNEL+NUM_PAG_DATA;
+
+	for(int i = SPACE_START; i < SPACE_END; i++) {
+		set_ss_pag(parent_page_table, i+NUM_PAG_DATA, get_frame(child_page_table, i));
+		copy_data((void *)(i<<12), (void *)((i+NUM_PAG_DATA)<<12), PAGE_SIZE);
+		del_ss_pag(parent_page_table, i+NUM_PAG_DATA);
+	}
 
 	set_cr3(get_DIR(current()));
 
-	// TODO Sections g and h
+	// Modify child parameters
+	child->PID = next_pid++;
+	
+	// Emulate task_switch
+	DWord * child_kernel_esp = (DWord *)KERNEL_ESP(child_task_union);
+	child_kernel_esp[-19] = 0;
+	child_kernel_esp[-18] = (DWord)ret_from_fork;
+	child->kernel_esp = (DWord)&child_kernel_esp[-19];
 
+	// End fork
 	list_add_tail(&child->list, &readyqueue);
-
   	return child->PID;
 }
 
