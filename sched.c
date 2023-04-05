@@ -11,6 +11,7 @@ struct list_head freequeue;
 struct list_head readyqueue;
 
 int next_pid = 3;
+int current_time_left;
 
 void writeMSR(int msr_addr, int msr_topval, int msr_lowval);
 void inner_task_switch(union task_union*t);
@@ -71,6 +72,7 @@ void init_idle (void)
 	list_del(list_head_idle);
 
 	idle_task->PID = 0;
+	idle_task->quantum = QUANTUM_INIT;
 	allocate_DIR(idle_task);
 
 	DWord *stack = (DWord*)KERNEL_ESP((union task_union*)idle_task);
@@ -88,6 +90,7 @@ void init_task1(void)
 	list_del(list_head_init);
 	
 	task_init->PID = 1;
+	task_init->quantum = QUANTUM_INIT;
 	allocate_DIR(task_init);
 	set_user_pages(task_init);
 	task_init->kernel_esp = KERNEL_ESP((union task_union*)task_init);
@@ -124,4 +127,37 @@ void inner_task_switch(union task_union*t)
 	set_cr3(get_DIR(&t->task));
 
 	inner_task_switch_asm(current()->kernel_esp, t->task.kernel_esp);
+}
+
+void sched_next_rr() {
+	current_time_left--;
+}
+
+int needs_sched_rr() {
+	if(current_time_left == 0) {
+		if(!list_empty(&freequeue))
+			return 1;
+		current_time_left = current()->quantum;
+	}
+	return 0;
+}
+
+void update_process_state_rr(struct task_struct *t, struct list_head *dest) {
+
+}
+
+void update_sched_data_rr() {
+
+}
+
+int get_quantum(struct task_struct *t) {
+	return t->quantum;
+}
+
+void set_quantum(struct task_struct *t, int new_quantum) {
+	t->quantum = new_quantum;
+}
+
+void schedule() {
+	
 }
