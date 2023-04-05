@@ -94,7 +94,7 @@
           self.packages.${system}.default
           self.packages.${system}.bochs
           pkgs.dev86
-          pkgs.gcc
+          pkgs.gcc11
           pkgs.gdb
         ];
       };
