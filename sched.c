@@ -129,26 +129,7 @@ void inner_task_switch(union task_union*t)
 	inner_task_switch_asm(current()->kernel_esp, t->task.kernel_esp);
 }
 
-void sched_next_rr() {
-	current_time_left--;
-}
-
-int needs_sched_rr() {
-	if(current_time_left == 0) {
-		if(!list_empty(&freequeue))
-			return 1;
-		current_time_left = current()->quantum;
-	}
-	return 0;
-}
-
-void update_process_state_rr(struct task_struct *t, struct list_head *dest) {
-
-}
-
-void update_sched_data_rr() {
-
-}
+// Scheduling Policy - Round Robin
 
 int get_quantum(struct task_struct *t) {
 	return t->quantum;
@@ -158,6 +139,48 @@ void set_quantum(struct task_struct *t, int new_quantum) {
 	t->quantum = new_quantum;
 }
 
-void schedule() {
+void update_sched_data_rr() {
+	current_time_left--;
+}
+
+int needs_sched_rr() {
+	if(current_time_left == 0) {
+		if(!list_empty(&freequeue))
+			return 1;
+		current_time_left = get_quantum(current());
+	}
+	return 0;
+}
+
+void update_process_state_rr(struct task_struct *t, struct list_head *dest) {
+	// Remove it from the actual queue
+	if(t->list.prev && t->list.next)
+		list_del(&t->list);
+
+	// Add it to the new queue
+	if(dest)
+		list_add_tail(&t->list, dest);
+}
+
+void sched_next_rr() {
+	struct task_struct * next_task;
+
+	if(list_empty(&readyqueue))
+		next_task = idle_task;
+	else {
+		struct list_head * next_list_head = readyqueue.next;
+		next_task = list_head_to_task_struct(next_list_head);
+		list_del(next_list_head);
+	}
 	
+	current_time_left = next_task->quantum;
+	task_switch((union task_union *)next_task);
+}
+
+void schedule() {
+	update_sched_data_rr();
+	if(needs_sched_rr()) {
+		update_process_state_rr(current(), &readyqueue);
+		sched_next_rr();
+	}
 }
