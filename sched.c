@@ -91,6 +91,8 @@ void init_task1(void)
 	
 	task_init->PID = 1;
 	task_init->quantum = QUANTUM_INIT;
+	current_time_left = task_init->quantum;
+
 	allocate_DIR(task_init);
 	set_user_pages(task_init);
 	task_init->kernel_esp = KERNEL_ESP((union task_union*)task_init);
@@ -145,7 +147,7 @@ void update_sched_data_rr() {
 
 int needs_sched_rr() {
 	if(current_time_left == 0) {
-		if(!list_empty(&freequeue))
+		if(!list_empty(&readyqueue))
 			return 1;
 		current_time_left = get_quantum(current());
 	}
