@@ -126,6 +126,9 @@ void inner_task_switch(union task_union*t)
 {
 	tss.esp0 = t->task.kernel_esp;
   	writeMSR(0x175, 0, t->task.kernel_esp);
+	//maybe wrong?
+	//tss.esp0 = (unsigned long)&(t->stack[KERNEL_STACK_SIZE]);
+   	//writeMSR(0x175, 0, (unsigned long)&(t->stack[KERNEL_STACK_SIZE]));
 	set_cr3(get_DIR(&t->task));
 
 	inner_task_switch_asm(current()->kernel_esp, t->task.kernel_esp);

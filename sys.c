@@ -50,7 +50,7 @@ int sys_fork()
 
 	union task_union * child_task_union = ((union task_union*)child);
 
-	copy_data(current(), child, KERNEL_STACK_SIZE);
+	copy_data(current(), child_task_union, sizeof(union task_union)); //this fixed
 
 	allocate_DIR(child);
 
@@ -92,6 +92,13 @@ int sys_fork()
 		del_ss_pag(parent_page_table, i+NUM_PAG_DATA+NUM_PAG_CODE);
 	}
 
+	//mayb fixes?
+	//for(int i = 0; i < NUM_PAG_DATA; i++) {
+    //    set_ss_pag(parent_page_table, TOTAL_PAGES-NUM_PAG_DATA+i, get_frame(child_page_table, PAG_LOG_INIT_DATA + i));
+    //    copy_data((void *)((PAG_LOG_INIT_DATA + i)<<12), (void *)((TOTAL_PAGES-NUM_PAG_DATA+i)<<12), PAGE_SIZE);
+    //    del_ss_pag(parent_page_table, TOTAL_PAGES-NUM_PAG_DATA+i);
+    //}
+
 	set_cr3(get_DIR(current()));
 
 	// Modify child parameters
@@ -100,8 +107,13 @@ int sys_fork()
 	// Emulate task_switch
 	DWord * child_kernel_esp = (DWord *)KERNEL_ESP(child_task_union);
 	child_kernel_esp[-19] = 0;
-	child_kernel_esp[-18] = (DWord)ret_from_fork;
+	child_kernel_esp[-18] = (DWord)ret_from_fork; //crec q falta &ret_from_fork
 	child->kernel_esp = (DWord)&child_kernel_esp[-19];
+	
+	//mayb fixes?
+	//child_task_union->stack[KERNEL_STACK_SIZE - 18] = (unsigned long)&ret_from_fork;
+    //child_task_union->stack[KERNEL_STACK_SIZE - 19] = 0;
+    //child->kernel_esp=(unsigned long)&child_task_union->stack[KERNEL_STACK_SIZE - 19];
 
 	// End fork
 	list_add_tail(&child->list, &readyqueue);

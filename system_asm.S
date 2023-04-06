@@ -26,7 +26,7 @@ ENTRY(task_switch)
 
       popl %ebx
       popl %edi
-      popl %ebx
+      popl %esi //crec q estava mal
 
       popl %ebp
       ret 
