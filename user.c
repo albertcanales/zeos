@@ -50,12 +50,22 @@ int __attribute__ ((__section__(".text.main")))
   write(1, pidstr, strlen(pidstr));
   write(1, "\n", 1);
 
-  fork();
+  //fork();
 
   write(1, buffer5, strlen(buffer5));
   itoa(getpid(), pidstr);
   write(1, pidstr, strlen(pidstr));
   write(1, "\n", 1);
 
-  while(1);
+  int i = 0;
+  char *buffer6 = "Timer: ";
+  char istr[10];
+  while(1) {
+    write(1, buffer5, strlen(buffer5));  
+    itoa(i, istr);
+    write(1, istr, strlen(istr));
+    write(1, "\n", 1);
+    i++;
+    for(int j = 0; j < 1000000; j++);
+  }
 }
