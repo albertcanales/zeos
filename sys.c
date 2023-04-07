@@ -43,6 +43,7 @@ int ret_from_fork() {
 
 int sys_fork()
 {
+	update_user_ticks();
 	if (list_empty(&freequeue)) return -EAGAIN; // No more PIDs available
 
 	struct list_head * list_head_fork = list_first(&freequeue);
@@ -59,6 +60,7 @@ int sys_fork()
 	int child_pages[NUM_PAG_DATA];
 	for(int i = 0; i < NUM_PAG_DATA; i++) {
 		child_pages[i] = alloc_frame();
+		update_system_ticks();
 		if (child_pages[i] == -1) {
 			// Free previous resources
 			for(int j = 0; j < i; j++)
@@ -107,11 +109,12 @@ int sys_fork()
 	
 	// End fork
 	list_add_tail(&child->list, &readyqueue);
+	update_system_ticks();
   	return child->PID;
 }
 
 void sys_exit()
-{  
+{
 	page_table_entry * exiting_page_table = get_PT(current());
 	
 
@@ -124,7 +127,6 @@ void sys_exit()
 	current()->dir_pages_baseAddr = NULL;
 	update_process_state_rr(current(), &freequeue);
 	sched_next_rr();
-		
 }
 
 int sys_get_stats(int pid, struct stats *s)
@@ -154,6 +156,7 @@ int sys_get_stats(int pid, struct stats *s)
 }
 
 int sys_write(int fd, void *buffer, int size) {
+	update_user_ticks();
 	// Check errors
 	int ret;
 	ret = check_fd(fd, ESCRIPTURA);
@@ -171,6 +174,7 @@ int sys_write(int fd, void *buffer, int size) {
 		written += bytes;
 		if(bytes < to_read) return written;
 	}
+	update_system_ticks();
 	return written;
 }
 

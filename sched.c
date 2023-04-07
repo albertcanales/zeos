@@ -145,6 +145,7 @@ void set_quantum(struct task_struct *t, int new_quantum) {
 
 void update_sched_data_rr() {
 	current_time_left--;
+	current()->stats.remaining_ticks = current_time_left;
 }
 
 int needs_sched_rr() {
@@ -177,6 +178,11 @@ void sched_next_rr() {
 		list_del(next_list_head);
 	}
 	
+	
+	update_system_ticks();
+	update_ticks(&next_task->stats.ready_ticks, &next_task->stats.elapsed_total_ticks);
+	next_task->stats.total_trans++;
+
 	current_time_left = next_task->quantum;
 	task_switch((union task_union *)next_task);
 }
@@ -197,7 +203,7 @@ void init_stats(struct stats *s) {
 	s->system_ticks = 0;
 	s->blocked_ticks = 0;
 	s->ready_ticks = 0;
-	s->elapsed_total_ticks = 0;
+	s->elapsed_total_ticks = get_ticks();
 	s->total_trans = 0;
 	s->remaining_ticks = 0;
 }
@@ -206,4 +212,12 @@ void update_ticks(unsigned long *destination, unsigned long *total) {
 	unsigned long current_ticks = get_ticks();
 	*destination += current_ticks - *total;
 	*total = current_ticks;
+}
+
+void update_user_ticks() {
+	update_ticks(&current()->stats.user_ticks, &current()->stats.elapsed_total_ticks);
+}
+
+void update_system_ticks() {
+	update_ticks(&current()->stats.system_ticks, &current()->stats.elapsed_total_ticks);
 }

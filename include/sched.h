@@ -75,5 +75,7 @@ void schedule();
 /* Headers for stats */
 void init_stats(struct stats *s);
 void update_ticks(unsigned long *destination, unsigned long *total);
+void update_user_ticks();
+void update_system_ticks();
 
 #endif  /* __SCHED_H__ */

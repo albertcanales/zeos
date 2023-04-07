@@ -116,14 +116,17 @@ void my_page_fault_routine(unsigned int error, unsigned int eip) {
 }
 
 void clock_routine() {
+  update_user_ticks();
+
   zeos_ticks++;
-
   schedule();
-
   zeos_show_clock();
+
+  update_system_ticks();
 }
 
 void keyboard_routine() {
+  update_user_ticks();
   char key = inb(0x60);
 
   if ((key >> 7) & 1) {
@@ -133,6 +136,7 @@ void keyboard_routine() {
     else
       printc_xy(0, 0, 'C');
   }
+  update_system_ticks();
 }
 
 void setIdt()

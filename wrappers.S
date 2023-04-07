@@ -5,7 +5,7 @@
 	movl %esp, %ebp; \
 	pushl %ebx; \
 	pushl %edi; \
-	pushl %esi
+	pushl %esi; \
 
 #define END_WRAPPER \
 	popl %ebp; \
