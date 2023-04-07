@@ -92,13 +92,6 @@ int sys_fork()
 		del_ss_pag(parent_page_table, i+NUM_PAG_DATA+NUM_PAG_CODE);
 	}
 
-	//mayb fixes?
-	//for(int i = 0; i < NUM_PAG_DATA; i++) {
-    //    set_ss_pag(parent_page_table, TOTAL_PAGES-NUM_PAG_DATA+i, get_frame(child_page_table, PAG_LOG_INIT_DATA + i));
-    //    copy_data((void *)((PAG_LOG_INIT_DATA + i)<<12), (void *)((TOTAL_PAGES-NUM_PAG_DATA+i)<<12), PAGE_SIZE);
-    //    del_ss_pag(parent_page_table, TOTAL_PAGES-NUM_PAG_DATA+i);
-    //}
-
 	set_cr3(get_DIR(current()));
 
 	// Modify child parameters

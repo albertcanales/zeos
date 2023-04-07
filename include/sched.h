@@ -37,7 +37,6 @@ extern int next_pid;
 extern int current_time_left;
 
 extern struct task_struct *idle_task;
-extern struct task_struct *init_task;
 
 
 #define KERNEL_ESP(t)       	(DWord) &(t)->stack[KERNEL_STACK_SIZE]

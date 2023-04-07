@@ -10,7 +10,7 @@
 struct list_head freequeue;
 struct list_head readyqueue;
 
-int next_pid = 3;
+int next_pid = 1000;
 int current_time_left;
 
 void writeMSR(int msr_addr, int msr_topval, int msr_lowval);
@@ -18,7 +18,6 @@ void inner_task_switch(union task_union*t);
 void inner_task_switch_asm();
 
 struct task_struct *idle_task;
-struct task_struct *init_task;
 
 
 union task_union task[NR_TASKS]
@@ -96,13 +95,9 @@ void init_task1(void)
 
 	allocate_DIR(task_init);
 	set_user_pages(task_init);
-	DWord* task_init_stack = (DWord*)KERNEL_ESP((union task_union*)task_init);
-	tss.esp0 = (DWord)task_init_stack;
-	writeMSR(0x175, 0, (DWord)task_init_stack);
-	task_init->kernel_esp = (DWord)&task_init_stack[-19];
+	tss.esp0 = KERNEL_ESP((union task_union*)task_init);
+	writeMSR(0x175, 0, KERNEL_ESP((union task_union*)task_init));
 	set_cr3(get_DIR(task_init));
-
-	init_task = task_init;
 }
 
 
@@ -132,7 +127,7 @@ void inner_task_switch(union task_union *t)
   	writeMSR(0x175, 0, KERNEL_ESP((union task_union*) t));
 	set_cr3(get_DIR(&t->task));
 
-	inner_task_switch_asm(current()->kernel_esp, t->task.kernel_esp);
+	inner_task_switch_asm(&current()->kernel_esp, t->task.kernel_esp);
 }
 
 // Scheduling Policy - Round Robin
