@@ -20,6 +20,11 @@
 # define BUFFER_SIZE 4096
 char buff[BUFFER_SIZE];
 
+int update_system_ticks_and_return(int retval) {
+	update_system_ticks();
+	return retval;
+}
+
 int check_fd(int fd, int permissions)
 {
   if (fd!=1) return -EBADF;
@@ -44,7 +49,7 @@ int ret_from_fork() {
 int sys_fork()
 {
 	update_user_ticks();
-	if (list_empty(&freequeue)) return -EAGAIN; // No more PIDs available
+	if (list_empty(&freequeue)) return update_system_ticks_and_return(-EAGAIN); // No more PIDs available
 
 	struct list_head * list_head_fork = list_first(&freequeue);
 	struct task_struct * child = list_head_to_task_struct(list_head_fork);
@@ -60,13 +65,12 @@ int sys_fork()
 	int child_pages[NUM_PAG_DATA];
 	for(int i = 0; i < NUM_PAG_DATA; i++) {
 		child_pages[i] = alloc_frame();
-		update_system_ticks();
 		if (child_pages[i] == -1) {
 			// Free previous resources
 			for(int j = 0; j < i; j++)
 				free_frame(child_pages[j]);
 			list_add_tail(&freequeue, list_head_fork);
-			return -ENOMEM;
+			return update_system_ticks_and_return(-ENOMEM);
 		}
 	}
 
@@ -109,8 +113,7 @@ int sys_fork()
 	
 	// End fork
 	list_add_tail(&child->list, &readyqueue);
-	update_system_ticks();
-  	return child->PID;
+  	return update_system_ticks_and_return(child->PID);
 }
 
 void sys_exit()
@@ -131,15 +134,15 @@ void sys_exit()
 
 int sys_get_stats(int pid, struct stats *s)
 {
-
+	update_user_ticks();
   	if (!access_ok(VERIFY_WRITE, s, sizeof(struct stats))) 
 	{
-		return -EFAULT;
+		return update_system_ticks_and_return(-EFAULT);
 	}
 	
 	if (pid < 0)
 	{
-		return -EINVAL;
+		return update_system_ticks_and_return(-EINVAL);
 	}
 		
 	for (int i = 0; i < NR_TASKS; i++)
@@ -149,10 +152,10 @@ int sys_get_stats(int pid, struct stats *s)
 			task[i].task.stats.remaining_ticks = current_time_left;
 			
 			copy_to_user(&(task[i].task.stats), s, sizeof(struct stats));
-			return 0;
+			return update_system_ticks_and_return(0);
 		}
 	}
-	return -ESRCH; /* No such process */
+	return update_system_ticks_and_return(-ESRCH); /* No such process */
 }
 
 int sys_write(int fd, void *buffer, int size) {
@@ -160,10 +163,10 @@ int sys_write(int fd, void *buffer, int size) {
 	// Check errors
 	int ret;
 	ret = check_fd(fd, ESCRIPTURA);
-	if(ret < 0) return ret;
-	if(size < 0) return -EINVAL;
+	if(ret < 0) return update_system_ticks_and_return(ret);
+	if(size < 0) return update_system_ticks_and_return(-EINVAL);
 	ret = access_ok(VERIFY_READ, buffer, size);
-	if(ret == 0) return -EFAULT;
+	if(ret == 0) return update_system_ticks_and_return(-EFAULT);
 
 	// Copy data and implement service
 	int written = 0;
@@ -172,10 +175,9 @@ int sys_write(int fd, void *buffer, int size) {
 		copy_from_user(buffer+written, buff, to_read);
 		int bytes = sys_write_console(buff, to_read);
 		written += bytes;
-		if(bytes < to_read) return written;
+		if(bytes < to_read) return update_system_ticks_and_return(written);
 	}
-	update_system_ticks();
-	return written;
+	return update_system_ticks_and_return(written);
 }
 
 int sys_gettime() {
