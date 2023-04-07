@@ -44,13 +44,13 @@ int sys_fork()
 {
 	if (list_empty(&freequeue)) return EAGAIN; // No more PIDs available
 
-	struct list_head * list_head_fork = freequeue.next;
+	struct list_head * list_head_fork = list_first(&freequeue);
 	struct task_struct * child = list_head_to_task_struct(list_head_fork);
 	list_del(list_head_fork);
 
 	union task_union * child_task_union = ((union task_union*)child);
 
-	copy_data(current(), child_task_union, sizeof(union task_union)); //this fixed
+	copy_data(current(), child_task_union, sizeof(union task_union));
 
 	allocate_DIR(child);
 
@@ -107,14 +107,9 @@ int sys_fork()
 	// Emulate task_switch
 	DWord * child_kernel_esp = (DWord *)KERNEL_ESP(child_task_union);
 	child_kernel_esp[-19] = 0;
-	child_kernel_esp[-18] = (DWord)ret_from_fork; //crec q falta &ret_from_fork
+	child_kernel_esp[-18] = (DWord)ret_from_fork;
 	child->kernel_esp = (DWord)&child_kernel_esp[-19];
 	
-	//mayb fixes?
-	//child_task_union->stack[KERNEL_STACK_SIZE - 18] = (unsigned long)&ret_from_fork;
-    //child_task_union->stack[KERNEL_STACK_SIZE - 19] = 0;
-    //child->kernel_esp=(unsigned long)&child_task_union->stack[KERNEL_STACK_SIZE - 19];
-
 	// End fork
 	list_add_tail(&child->list, &readyqueue);
   	return child->PID;

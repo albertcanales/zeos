@@ -120,8 +120,8 @@ void clock_routine() {
 
   if(zeos_ticks == 1000)
     task_switch(idle_task);
-  //if(zeos_ticks == 2000)
-  //  task_switch(list_head_to_task_struct(readyqueue.next));
+  if(zeos_ticks == 2000)
+    task_switch(init_task);
 
   //schedule();
 

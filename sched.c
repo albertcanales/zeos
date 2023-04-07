@@ -18,6 +18,7 @@ void inner_task_switch(union task_union*t);
 void inner_task_switch_asm();
 
 struct task_struct *idle_task;
+struct task_struct *init_task;
 
 
 union task_union task[NR_TASKS]
@@ -85,7 +86,7 @@ void init_idle (void)
 
 void init_task1(void)
 {
-	struct list_head *list_head_init = freequeue.next;
+	struct list_head *list_head_init = list_first(&freequeue);
 	struct task_struct *task_init = list_head_to_task_struct(list_head_init);
 	list_del(list_head_init);
 	
@@ -95,10 +96,11 @@ void init_task1(void)
 
 	allocate_DIR(task_init);
 	set_user_pages(task_init);
-	task_init->kernel_esp = KERNEL_ESP((union task_union*)task_init);
-	tss.esp0 = task_init->kernel_esp;
-	writeMSR(0x175, 0, task_init->kernel_esp);
+	tss.esp0 = KERNEL_ESP((union task_union*)task_init);
+	writeMSR(0x175, 0, KERNEL_ESP((union task_union*)task_init));
 	set_cr3(get_DIR(task_init));
+
+	init_task = task_init;
 }
 
 
@@ -122,13 +124,10 @@ struct task_struct* current()
   return (struct task_struct*)(ret_value&0xfffff000);
 }
 
-void inner_task_switch(union task_union*t)
+void inner_task_switch(union task_union *t)
 {
-	tss.esp0 = t->task.kernel_esp;
-  	writeMSR(0x175, 0, t->task.kernel_esp);
-	//maybe wrong?
-	//tss.esp0 = (unsigned long)&(t->stack[KERNEL_STACK_SIZE]);
-   	//writeMSR(0x175, 0, (unsigned long)&(t->stack[KERNEL_STACK_SIZE]));
+	tss.esp0 = KERNEL_ESP((union task_union*) t);
+  	writeMSR(0x175, 0, KERNEL_ESP((union task_union*) t));
 	set_cr3(get_DIR(&t->task));
 
 	inner_task_switch_asm(current()->kernel_esp, t->task.kernel_esp);
