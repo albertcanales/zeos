@@ -146,7 +146,7 @@ ENTRY(get_stats)
 	pushl %ecx
 	pushl %edx
 
-	pushl $write_sysenter_fi
+	pushl $get_stats_sysenter_fi
 
 	pushl %ebp
 	movl %esp, %ebp
@@ -157,7 +157,7 @@ get_stats_sysenter_fi:
 	END_WRAPPER
 
 	cmpl $0, %eax
-	jge write_fi
+	jge get_stats_fi
 	negl %eax
 	movl %eax, errno
 	movl $-1, %eax
