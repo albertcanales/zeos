@@ -50,7 +50,7 @@ int __attribute__ ((__section__(".text.main")))
   write(1, pidstr, strlen(pidstr));
   write(1, "\n", 1);
 
-  int fork_res = fork();
+  int fork_res = 0; //fork();
 
   char *buffer7 = "Process X got Y: ";
   char forkstr[10];
@@ -65,7 +65,7 @@ int __attribute__ ((__section__(".text.main")))
   // Trying to force a EAGAIN
   int val_fork = 0;
   int i = 0;
-  while(val_fork >= 0) {
+  while(0 && val_fork >= 0) {
     val_fork = fork();
     if(val_fork == -1) {
       perror();
@@ -83,5 +83,54 @@ int __attribute__ ((__section__(".text.main")))
     write(1, "\n", 1);
   }
 
-  while(1);
+  struct stats st;
+
+  // Hauria de petar per pid invàlid
+  ret = get_stats(-1, &st);
+  if(ret < 0)
+    perror();
+  
+  // Hauria de petar per invàlid st
+  ret = get_stats(getpid(), 0x0);
+  if(ret < 0)
+    perror();
+
+  // Hauria de petar per pid no existent
+  ret = get_stats(3000, &st);
+  if(ret < 0)
+    perror();
+
+  char *buffer9 = "Stats are: ";
+  char statstr[20];
+  while(1) {
+    //Hauria d'anar bé
+    ret = get_stats(getpid(), &st);
+    if(ret < 0)
+      perror();
+
+    write(1, buffer9, strlen(buffer9));
+    itoa(st.user_ticks, statstr);
+    write(1, statstr, strlen(statstr));
+    write(1, " ", 1);
+    itoa(st.system_ticks, statstr);
+    write(1, statstr, strlen(statstr));
+    write(1, " ", 1);
+    itoa(st.blocked_ticks, statstr);
+    write(1, statstr, strlen(statstr));
+    write(1, " ", 1);
+    itoa(st.ready_ticks, statstr);
+    write(1, statstr, strlen(statstr));
+    write(1, " ", 1);
+    itoa(st.elapsed_total_ticks, statstr);
+    write(1, statstr, strlen(statstr));
+    write(1, " ", 1);
+    itoa(st.total_trans, statstr);
+    write(1, statstr, strlen(statstr));
+    write(1, " ", 1);
+    itoa(st.remaining_ticks, statstr);
+    write(1, statstr, strlen(statstr));
+    write(1, "\n", 1);
+
+    for(int i = 0; i < 100000000; i++);
+  }
 }

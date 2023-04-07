@@ -24,6 +24,8 @@ int fork();
 
 void exit();
 
+int get_stats(int pid, struct stats *st);
+
 void strcpy(char* orig, char* dest);
 
 void perror();
