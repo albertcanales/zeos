@@ -6,6 +6,7 @@
 #include <sched.h>
 #include <mm.h>
 #include <io.h>
+#include <utils.h>
 
 struct list_head freequeue;
 struct list_head readyqueue;
@@ -73,6 +74,7 @@ void init_idle (void)
 
 	idle_task->PID = 0;
 	idle_task->quantum = QUANTUM_INIT;
+	init_stats(&idle_task->stats);
 	allocate_DIR(idle_task);
 
 	DWord *stack = (DWord*)KERNEL_ESP((union task_union*)idle_task);
@@ -92,6 +94,7 @@ void init_task1(void)
 	task_init->PID = 1;
 	task_init->quantum = QUANTUM_INIT;
 	current_time_left = task_init->quantum;
+	init_stats(&task_init->stats);
 
 	allocate_DIR(task_init);
 	set_user_pages(task_init);
@@ -184,4 +187,23 @@ void schedule() {
 		update_process_state_rr(current(), &readyqueue);
 		sched_next_rr();
 	}
+}
+
+
+// Stats
+
+void init_stats(struct stats *s) {
+	s->user_ticks = 0;
+	s->system_ticks = 0;
+	s->blocked_ticks = 0;
+	s->ready_ticks = 0;
+	s->elapsed_total_ticks = 0;
+	s->total_trans = 0;
+	s->remaining_ticks = 0;
+}
+
+void update_ticks(unsigned long *destination, unsigned long *total) {
+	unsigned long current_ticks = get_ticks();
+	*destination += current_ticks - *total;
+	*total = current_ticks;
 }

@@ -96,6 +96,7 @@ int sys_fork()
 
 	// Modify child parameters
 	child->PID = next_pid++;
+	init_stats(&child->stats);
 	
 	// Emulate task_switch
 	DWord * child_kernel_esp = (DWord *)KERNEL_ESP(child_task_union);
