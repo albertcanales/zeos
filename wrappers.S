@@ -134,3 +134,32 @@ ENTRY(exit)
 exit_sysenter_fi:
 	END_WRAPPER
 	ret
+
+ENTRY(get_stats)
+	INIT_WRAPPER
+
+	movl 8(%ebp), %ebx
+	movl 12(%ebp), %ecx
+
+	movl $35, %eax
+
+	pushl %ecx
+	pushl %edx
+
+	pushl $write_sysenter_fi
+
+	pushl %ebp
+	movl %esp, %ebp
+
+	sysenter
+
+get_stats_sysenter_fi:
+	END_WRAPPER
+
+	cmpl $0, %eax
+	jge write_fi
+	negl %eax
+	movl %eax, errno
+	movl $-1, %eax
+get_stats_fi:
+	ret
