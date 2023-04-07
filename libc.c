@@ -79,6 +79,9 @@ void perror() {
     case ENOMEM:
       strcpy("Out of memory.\n", buff);
       break;
+    case ESRCH:
+      strcpy("No such process.\n", buff);
+      break;
     default:
       strcpy("Unrecognised error.\n", buff);
   }
