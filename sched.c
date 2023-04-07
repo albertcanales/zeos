@@ -169,7 +169,7 @@ void sched_next_rr() {
 	if(list_empty(&readyqueue))
 		next_task = idle_task;
 	else {
-		struct list_head * next_list_head = readyqueue.next;
+		struct list_head * next_list_head = list_first(&readyqueue);
 		next_task = list_head_to_task_struct(next_list_head);
 		list_del(next_list_head);
 	}

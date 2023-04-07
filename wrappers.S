@@ -108,4 +108,10 @@ ENTRY(fork)
 
 fork_sysenter_fi:
 	END_WRAPPER
+	cmpl $0, %eax
+	jge fork_fi
+	negl %eax
+	movl %eax, errno
+	movl $-1, %eax
+fork_fi:
 	ret

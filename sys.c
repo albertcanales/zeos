@@ -42,7 +42,7 @@ int ret_from_fork() {
 
 int sys_fork()
 {
-	if (list_empty(&freequeue)) return EAGAIN; // No more PIDs available
+	if (list_empty(&freequeue)) return -EAGAIN; // No more PIDs available
 
 	struct list_head * list_head_fork = list_first(&freequeue);
 	struct task_struct * child = list_head_to_task_struct(list_head_fork);
@@ -63,7 +63,7 @@ int sys_fork()
 			for(int j = 0; j < i; j++)
 				free_frame(child_pages[j]);
 			list_add_tail(&freequeue, list_head_fork);
-			return ENOMEM;
+			return -ENOMEM;
 		}
 	}
 

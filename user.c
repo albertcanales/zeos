@@ -44,27 +44,44 @@ int __attribute__ ((__section__(".text.main")))
   write(1, "\n", 1);
 
   char *buffer5 = "The PID is: ";
-  write(1, buffer5, strlen(buffer5));
   char pidstr[10];
+  write(1, buffer5, strlen(buffer5));
   itoa(getpid(), pidstr);
   write(1, pidstr, strlen(pidstr));
   write(1, "\n", 1);
 
+  int fork_res = fork();
+
+  char *buffer7 = "Process X got Y: ";
+  char forkstr[10];
+  write(1, buffer7, strlen(buffer7));
+  itoa(getpid(), pidstr);
+  write(1, pidstr, strlen(pidstr));
+  write(1, " ", 1);
+  itoa(fork_res, forkstr);
+  write(1, forkstr, strlen(forkstr));
+  write(1, "\n", 1);
+
+  // Trying to force a EAGAIN
+  int val_fork = 0;
   int i = 0;
-  char *buffer6 = "Timer: ";
-  char istr[10];
-  while(1) {
-
-    write(1, buffer5, strlen(buffer5));
-    itoa(getpid(), pidstr);
-    write(1, pidstr, strlen(pidstr));
-    write(1, "\n", 1);
-
-    write(1, buffer6, strlen(buffer6));
-    itoa(i, istr);
-    write(1, istr, strlen(istr));
-    write(1, "\n", 1);
+  while(val_fork >= 0) {
+    val_fork = fork();
+    if(val_fork == -1) {
+      perror();
+    }
     i++;
-    for(int j = 0; j < 1000000; j++);
   }
+
+  char *buffer8 = "Fork error at iteration ";
+  char itstr[10];
+
+  if(1) {
+    write(1, buffer8, strlen(buffer8));
+    itoa(i, itstr);
+    write(1, itstr, strlen(itstr));
+    write(1, "\n", 1);
+  }
+
+  while(1);
 }

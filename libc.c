@@ -73,6 +73,12 @@ void perror() {
     case ENOSPC:
       strcpy("No space left on device.\n", buff);
       break;
+    case EAGAIN:
+      strcpy("Try again.\n", buff);
+      break;
+    case ENOMEM:
+      strcpy("Out of memory.\n", buff);
+      break;
     default:
       strcpy("Unrecognised error.\n", buff);
   }
