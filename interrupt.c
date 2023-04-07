@@ -118,12 +118,12 @@ void my_page_fault_routine(unsigned int error, unsigned int eip) {
 void clock_routine() {
   zeos_ticks++;
 
-  if(zeos_ticks == 1000)
-    task_switch(idle_task);
-  if(zeos_ticks == 2000)
-    task_switch(init_task);
+  //if(zeos_ticks == 1000)
+  //  task_switch(idle_task);
+  //if(zeos_ticks == 2000)
+  //  task_switch(init_task);
 
-  //schedule();
+  schedule();
 
   zeos_show_clock();
 }

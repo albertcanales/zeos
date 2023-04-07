@@ -96,8 +96,10 @@ void init_task1(void)
 
 	allocate_DIR(task_init);
 	set_user_pages(task_init);
-	tss.esp0 = KERNEL_ESP((union task_union*)task_init);
-	writeMSR(0x175, 0, KERNEL_ESP((union task_union*)task_init));
+	DWord* task_init_stack = (DWord*)KERNEL_ESP((union task_union*)task_init);
+	tss.esp0 = (DWord)task_init_stack;
+	writeMSR(0x175, 0, (DWord)task_init_stack);
+	task_init->kernel_esp = (DWord)&task_init_stack[-19];
 	set_cr3(get_DIR(task_init));
 
 	init_task = task_init;
