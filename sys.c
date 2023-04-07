@@ -110,6 +110,19 @@ int sys_fork()
 
 void sys_exit()
 {  
+	page_table_entry * exiting_page_table = get_PT(current());
+	
+
+	for(int i = 0; i < NUM_PAG_DATA; i++)
+	{
+		free_frame(get_frame(exiting_page_table, PAG_LOG_INIT_DATA+i));
+		del_ss_pag(exiting_page_table, PAG_LOG_INIT_DATA+i);
+	}
+	current()->PID = -1;
+	current()->dir_pages_baseAddr = NULL;
+	update_process_state_rr(current(), &freequeue);
+	sched_next_rr();
+		
 }
 
 int sys_write(int fd, void *buffer, int size) {

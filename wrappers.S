@@ -115,3 +115,22 @@ fork_sysenter_fi:
 	movl $-1, %eax
 fork_fi:
 	ret
+
+ENTRY(exit)
+	INIT_WRAPPER
+
+	movl $1, %eax
+
+	pushl %ecx
+	pushl %edx
+
+	pushl $exit_sysenter_fi
+
+	pushl %ebp
+	movl %esp, %ebp
+
+	sysenter
+
+exit_sysenter_fi:
+	END_WRAPPER
+	ret
