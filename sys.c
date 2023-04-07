@@ -2,6 +2,7 @@
  * sys.c - Syscalls implementation
  */
 #include "list.h"
+#include "stats.h"
 #include <devices.h>
 #include <utils.h>
 #include <io.h>
@@ -124,6 +125,32 @@ void sys_exit()
 	update_process_state_rr(current(), &freequeue);
 	sched_next_rr();
 		
+}
+
+int sys_get_stats(int pid, struct stats *s)
+{
+
+  	if (!access_ok(VERIFY_WRITE, s, sizeof(struct stats))) 
+	{
+		return -EFAULT;
+	}
+	
+	if (pid < 0)
+	{
+		return -EINVAL;
+	}
+		
+	for (int i = 0; i < NR_TASKS; i++)
+	{
+		if (task[i].task.PID == pid)
+		{
+			task[i].task.stats.remaining_ticks = current_time_left;
+			
+			copy_to_user(&(task[i].task.stats), s, sizeof(struct stats));
+			return 0;
+		}
+	}
+	return -ESRCH; /* No such process */
 }
 
 int sys_write(int fd, void *buffer, int size) {
