@@ -80,6 +80,8 @@ int __attribute__((__section__(".text.main")))
   setIdt(); /* Definicio del vector de interrupcions */
   setTSS(); /* Definicio de la TSS */
 
+  setKeyboardBuffer();
+
   /* Initialize Memory */
   init_mm();
 

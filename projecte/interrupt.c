@@ -6,6 +6,7 @@
 #include <segment.h>
 #include <hardware.h>
 #include <io.h>
+#include <buffer.h>
 
 #include <sched.h>
 
@@ -33,6 +34,45 @@ char char_map[] =
 
 int zeos_ticks = 0;
 
+struct circular_buffer keyboard_buffer;
+
+// Return string of hex representation from int
+void itoh(int a, char *b)
+{
+  char* keys = "0123456789ABCDEF";
+
+  int i, i1;
+  char c;
+
+  if (a==0) { b[0]='0'; b[1]=0; return ;}
+  
+  i=0;
+  while (a>0)
+  {
+    b[i]=keys[a%16];
+    a=a/16;
+    i++;
+  }
+  
+  for (i1=0; i1<i/2; i1++)
+  {
+    c=b[i1];
+    b[i1]=b[i-i1-1];
+    b[i-i1-1]=c;
+  }
+  b[i]=0;
+}
+
+
+void my_page_fault_routine(unsigned int error, unsigned int eip) {
+  char seip[16];
+  itoh(eip, seip);
+  printk("\nProcess generates a PAGE FAULT exception at EIP :0x");
+  printk(seip);
+  printk("\n");
+  while(1);
+}
+
 void clock_routine()
 {
   zeos_show_clock();
@@ -46,6 +86,8 @@ void keyboard_routine()
   unsigned char c = inb(0x60);
   
   if (c&0x80) printc_xy(0, 0, char_map[c&0x7f]);
+
+  buffer_push(&keyboard_buffer, c);
 }
 
 void setInterruptHandler(int vector, void (*handler)(), int maxAccessibleFromPL)
@@ -92,6 +134,7 @@ void setTrapHandler(int vector, void (*handler)(), int maxAccessibleFromPL)
   idt[vector].highOffset      = highWord((DWord)handler);
 }
 
+void my_page_fault_handler();
 void clock_handler();
 void keyboard_handler();
 void system_call_handler();
@@ -114,11 +157,17 @@ void setIdt()
   set_handlers();
 
   /* ADD INITIALIZATION CODE FOR INTERRUPT VECTOR */
+  setInterruptHandler(14, my_page_fault_handler, 0);
+
   setInterruptHandler(32, clock_handler, 0);
   setInterruptHandler(33, keyboard_handler, 0);
 
   setSysenter();
 
   set_idt_reg(&idtR);
+}
+
+void setKeyboardBuffer() {
+  INIT_BUFFER(&keyboard_buffer);
 }
 

@@ -13,7 +13,6 @@ void buffer_push(struct circular_buffer *buffer, char value) {
 		buffer->write_index = (buffer->write_index + 1) % BUFFER_SIZE;
 		buffer->size++;
 	}
-
 }
 
 char buffer_pop(struct circular_buffer *buffer) {
@@ -24,7 +23,6 @@ char buffer_pop(struct circular_buffer *buffer) {
 		return value;
 	}
 	return 0;
-	
 }
 
 int buffer_empty(struct circular_buffer *buffer) {

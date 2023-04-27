@@ -69,6 +69,9 @@
       movb $0x20, %al; \
       outb %al, $0x20;
 
+ENTRY(my_page_fault_handler)
+      call my_page_fault_routine
+
 ENTRY(clock_handler)
       SAVE_ALL
       pushl %eax;

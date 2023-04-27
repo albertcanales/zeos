@@ -17,4 +17,6 @@ void setTrapHandler(int vector, void (*handler)(), int maxAccessibleFromPL);
 
 void setIdt();
 
+void setKeyboardBuffer();
+
 #endif  /* __INTERRUPT_H__ */
