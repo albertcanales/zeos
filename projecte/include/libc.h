@@ -12,6 +12,8 @@ extern int errno;
 
 int write(int fd, char *buffer, int size);
 
+int read(char *b, int maxchars);
+
 void itoa(int a, char *b);
 
 int strlen(char *a);

@@ -179,6 +179,11 @@ int ret;
 	return (nbytes-bytes_left);
 }
 
+int sys_read(char* b, int maxchars) {
+  printk("Entered read");
+  return 0;
+}
+
 
 extern int zeos_ticks;
 
