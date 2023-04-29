@@ -17,6 +17,10 @@
 
 #include <errno.h>
 
+#include<buffer.h>
+
+#include <interrupt.h>
+
 #define LECTURA 0
 #define ESCRIPTURA 1
 
@@ -180,8 +184,26 @@ int ret;
 }
 
 int sys_read(char* b, int maxchars) {
-  printk("Entered read");
-  return 0;
+  char localbuffer [TAM_BUFFER];
+  int num_read;
+
+  if (maxchars < 0)
+    return -EINVAL;
+  if (!access_ok(VERIFY_WRITE, b, maxchars))
+    return -EFAULT;
+
+  num_read = 0;
+  while(!buffer_empty(&keyboard_buffer) && num_read < maxchars) {
+    localbuffer[num_read % TAM_BUFFER] = buffer_pop(&keyboard_buffer);
+    num_read++;
+    if(num_read % TAM_BUFFER == 0)
+      copy_to_user(localbuffer, b+num_read, TAM_BUFFER);
+  }
+
+  if(num_read % TAM_BUFFER != 0)
+    copy_to_user(localbuffer, b + num_read - (num_read%TAM_BUFFER), num_read%TAM_BUFFER);
+
+  return num_read;
 }
 
 

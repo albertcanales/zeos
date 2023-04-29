@@ -11,8 +11,10 @@ int __attribute__ ((__section__(".text.main")))
      /* __asm__ __volatile__ ("mov %0, %%cr3"::"r" (0) ); */
 
   char b[100];
+  int num_read;
 
-  read(b, 100);
-
-  while(1) { }
+  while(1) {
+    num_read = read(b, 100);
+    write(1, b, num_read);
+  }
 }
