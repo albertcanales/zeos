@@ -15,5 +15,6 @@ void printc(char c);
 void printc_xy(Byte x, Byte y, char c);
 void printk(char *string);
 int setxy(int new_x, int new_y);
+int set_col(int new_fg, int new_bg);
 
 #endif  /* __IO_H__ */

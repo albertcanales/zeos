@@ -269,3 +269,9 @@ int sys_gotoxy(int x, int y) {
     return -EINVAL;
   return 0;
 }
+
+int sys_set_color(int fg, int bg) {
+  if (set_col(fg,bg) < 0)
+    return -EINVAL;
+  return 0;
+}

@@ -32,4 +32,6 @@ int get_stats(int pid, struct stats *st);
 
 int gotoxy(int x, int y);
 
+int set_color(int fg, int bg);
+
 #endif  /* __LIBC_H__ */

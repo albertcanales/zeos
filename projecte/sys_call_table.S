@@ -25,7 +25,7 @@ ENTRY (sys_call_table)
 	.long sys_getpid	//20	
 	.long sys_ni_syscall	//21
 	.long sys_gotoxy		//22
-	.long sys_ni_syscall	//23
+	.long sys_set_color		//23
 	.long sys_ni_syscall	//24
 	.long sys_ni_syscall	//25
 	.long sys_ni_syscall	//26

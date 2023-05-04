@@ -22,6 +22,12 @@ int __attribute__ ((__section__(".text.main")))
   if (gotoxy(100, 20) && gotoxy(20, 100) && gotoxy(-2, 10) && gotoxy(20, -1))
     write(1, falla, strlen(falla));
 
+  char provacol[] = "aixo hauria d'estar canviat";
+  set_color(15, 1);
+  write(1, provacol, strlen(provacol));
+  if (set_color(17, 1) && set_color(1, 9) && set_color(-1, 5) && set_color(3, -2))
+    write(1, falla, strlen(falla));
+
   while(1) {
     num_read = read(b, 4);
     write(1, b, num_read);

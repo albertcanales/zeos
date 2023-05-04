@@ -14,6 +14,7 @@
 #define NUM_ROWS    25
 
 Byte x, y=19;
+Byte fg=2, bg=0;
 
 /* Read a byte from 'port' */
 Byte inb (unsigned short port)
@@ -34,7 +35,7 @@ void printc(char c)
   }
   else
   {
-    Word ch = (Word) (c & 0x00FF) | 0x0200;
+    Word ch = (Word) (c & 0x00FF) | fg<<8 | bg<<12;
 	Word *screen = (Word *)0xb8000;
 	screen[(y * NUM_COLUMNS + x)] = ch;
     if (++x >= NUM_COLUMNS)
@@ -69,5 +70,13 @@ int setxy(int new_x, int new_y) {
     return -1;
   x = new_x;
   y = new_y;
+  return 0;
+}
+
+int set_col(int new_fg, int new_bg) {
+  if(new_fg < 0 || new_bg < 0 || new_fg >= 16 || new_bg >= 8)
+    return -1;
+  fg = new_fg;
+  bg = new_bg;
   return 0;
 }

@@ -129,3 +129,18 @@ ENTRY(gotoxy)
 	js nok	// if (eax < 0) -> 
 	popl %ebp
 	ret
+
+/* int set_color(int fg, int bg) */
+ENTRY(set_color)
+	pushl %ebp
+	movl %esp, %ebp
+	pushl %ebx;  // Save EBX, ESI and EDI if modified
+	movl $23, %eax
+	movl 0x8(%ebp), %ebx;	//fg
+	movl 0xC(%ebp), %ecx;	//bg
+	call syscall_sysenter
+	popl %ebx
+	test %eax, %eax
+	js nok	// if (eax < 0) -> 
+	popl %ebp
+	ret
