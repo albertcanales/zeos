@@ -144,3 +144,18 @@ ENTRY(set_color)
 	js nok	// if (eax < 0) -> 
 	popl %ebp
 	ret
+
+/* int shmat(int id, void* addr) */
+ENTRY(shmat)
+	pushl %ebp
+	movl %esp, %ebp
+	pushl %ebx;  // Save EBX, ESI and EDI if modified
+	movl $30, %eax
+	movl 0x8(%ebp), %ebx;	//id
+	movl 0xC(%ebp), %ecx;	//addr
+	call syscall_sysenter
+	popl %ebx
+	test %eax, %eax
+	js nok	// if (eax < 0) -> 
+	popl %ebp
+	ret

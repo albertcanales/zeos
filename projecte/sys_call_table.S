@@ -32,7 +32,7 @@ ENTRY (sys_call_table)
 	.long sys_ni_syscall	//27
 	.long sys_ni_syscall	//28
 	.long sys_ni_syscall	//29
-	.long sys_ni_syscall	//30
+	.long sys_shmat			//30
 	.long sys_ni_syscall	//31
 	.long sys_ni_syscall	//32
 	.long sys_ni_syscall	//33

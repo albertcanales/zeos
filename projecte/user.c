@@ -28,6 +28,8 @@ int __attribute__ ((__section__(".text.main")))
   if (set_color(17, 1) && set_color(1, 9) && set_color(-1, 5) && set_color(3, -2))
     write(1, falla, strlen(falla));
 
+  shmat(4, (void*)0x100000); 
+
   while(1) {
     num_read = read(b, 4);
     write(1, b, num_read);

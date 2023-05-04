@@ -275,3 +275,8 @@ int sys_set_color(int fg, int bg) {
     return -EINVAL;
   return 0;
 }
+
+int sys_shmat(int id, void* addr) {
+  printk("shmat");
+  return 0;
+}

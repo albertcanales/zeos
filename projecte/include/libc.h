@@ -34,4 +34,6 @@ int gotoxy(int x, int y);
 
 int set_color(int fg, int bg);
 
+int shmat(int id, void* addr);
+
 #endif  /* __LIBC_H__ */
