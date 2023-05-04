@@ -1,0 +1,14 @@
+*
+!*.c
+!*.S
+!*.h
+!*.lds
+!*.a
+!Makefile
+!.gdbcmd
+!.bochsrc_gdb
+!.bochsrc
+!include/
+!flake.nix
+!flake.lock
+!.envrc
