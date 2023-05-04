@@ -63,3 +63,11 @@ void printk(char *string)
   for (i = 0; string[i]; i++)
     printc(string[i]);
 }
+
+int setxy(int new_x, int new_y) {
+  if(new_x < 0 || new_y < 0 || new_x >= NUM_COLUMNS || new_y >= NUM_ROWS)
+    return -1;
+  x = new_x;
+  y = new_y;
+  return 0;
+}

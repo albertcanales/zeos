@@ -265,6 +265,7 @@ int sys_get_stats(int pid, struct stats *st)
 }
 
 int sys_gotoxy(int x, int y) {
-  printk("gotoxy");
+  if (setxy(x,y) < 0)
+    return -EINVAL;
   return 0;
 }

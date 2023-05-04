@@ -15,6 +15,12 @@ int __attribute__ ((__section__(".text.main")))
   char numstr[10];
 
   gotoxy(2, 3);
+  char prova[] = "hola!!!!";
+  write(1, prova, strlen(prova));
+
+  char falla[] = "tot falla";
+  if (gotoxy(100, 20) && gotoxy(20, 100) && gotoxy(-2, 10) && gotoxy(20, -1))
+    write(1, falla, strlen(falla));
 
   while(1) {
     num_read = read(b, 4);
