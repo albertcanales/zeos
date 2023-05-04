@@ -10,7 +10,7 @@
 
 Byte phys_mem[TOTAL_PAGES];
 
-Byte shared_phys_mem[10];
+Byte shared_phys_mem[SHARED_FRAMES];
 
 /* SEGMENTATION */
 /* Memory segements description table */
@@ -132,11 +132,18 @@ void set_pe_flag()
   write_cr0(cr0);
 }
 
+void init_shared_frames() {
+  for(int i = 0; i < SHARED_FRAMES; i++) {
+    shared_phys_mem[i] = alloc_frame();
+  }
+}
+
 /* Initializes paging for the system address space */
 void init_mm()
 {
   init_table_pages();
   init_frames();
+  init_shared_frames();
   init_dir_pages();
   allocate_DIR(&task[0].task);
   set_cr3(get_DIR(&task[0].task));
@@ -267,4 +274,11 @@ void del_ss_pag(page_table_entry *PT, unsigned logical_page)
 /* get_frame - Returns the physical frame associated to page 'logical_page' */
 unsigned int get_frame (page_table_entry *PT, unsigned int logical_page){
      return PT[logical_page].bits.pbase_addr; 
+}
+
+int get_first_free_page(page_table_entry *PT) {
+  for(int i = 1; i < TOTAL_PAGES; i++)
+    if(!get_frame(PT, i))
+      return i;
+  return -1;
 }

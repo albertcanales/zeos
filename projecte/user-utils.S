@@ -145,7 +145,7 @@ ENTRY(set_color)
 	popl %ebp
 	ret
 
-/* int shmat(int id, void* addr) */
+/* void* shmat(int id, void* addr) */
 ENTRY(shmat)
 	pushl %ebp
 	movl %esp, %ebp

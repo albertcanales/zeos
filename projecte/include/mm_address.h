@@ -11,6 +11,7 @@
 #define PAG_LOG_INIT_DATA (PAG_LOG_INIT_CODE+NUM_PAG_CODE)
 #define NUM_PAG_DATA 20
 #define PAGE_SIZE 0x1000
+#define SHARED_FRAMES 10
 
 /* Memory distribution */
 /***********************/

@@ -14,7 +14,7 @@
 #define USED_FRAME 1
 /* Bytemap to mark the free physical pages */
 extern Byte phys_mem[TOTAL_PAGES];
-
+extern Byte shared_phys_mem[SHARED_FRAMES];
 
 extern page_table_entry dir_pages[NR_TASKS][TOTAL_PAGES];
 
@@ -38,5 +38,7 @@ void setTSS();
 void set_ss_pag(page_table_entry *PT, unsigned page,unsigned frame);
 void del_ss_pag(page_table_entry *PT, unsigned page);
 unsigned int get_frame(page_table_entry *PT, unsigned int page);
+
+int get_first_free_page(page_table_entry *PT);
 
 #endif  /* __MM_H__ */

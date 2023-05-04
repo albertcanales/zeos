@@ -276,7 +276,20 @@ int sys_set_color(int fg, int bg) {
   return 0;
 }
 
-int sys_shmat(int id, void* addr) {
-  printk("shmat");
-  return 0;
+void* sys_shmat(int id, void* addr) {
+  if (id < 0 || id >= SHARED_FRAMES || (int)addr % PAGE_SIZE != 0)
+    return (void*)-EINVAL;
+
+  if(addr == NULL || get_frame(get_PT(current()), PH_PAGE((int)addr))) {
+    
+    int page = get_first_free_page(get_PT(current()), PH_PAGE((int)addr));
+    if(page < 0)
+      return (void*)-ENOMEM;
+    addr = (void*) (page * PAGE_SIZE);
+
+  }
+
+  set_ss_pag(get_PT(current()), PH_PAGE((int)addr), shared_phys_mem[id]);
+
+  return addr;
 }

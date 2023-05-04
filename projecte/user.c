@@ -28,7 +28,22 @@ int __attribute__ ((__section__(".text.main")))
   if (set_color(17, 1) && set_color(1, 9) && set_color(-1, 5) && set_color(3, -2))
     write(1, falla, strlen(falla));
 
-  shmat(4, (void*)0x100000); 
+  char* addr = shmat(2, (void*)0); 
+
+  *addr = 'a';
+
+  int ret = fork();
+
+  if(ret == 0) {
+    char* addr2 = shmat(2, (void*)0x1000000);
+    *addr2 = 'b';
+    while(1);
+  }
+  else {
+    while(1) {
+      write(1, addr, 1);
+    }
+  }
 
   while(1) {
     num_read = read(b, 4);
