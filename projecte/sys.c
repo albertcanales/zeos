@@ -197,7 +197,7 @@ int sys_read(char* b, int maxchars) {
     localbuffer[num_read % TAM_BUFFER] = buffer_pop(&keyboard_buffer);
     num_read++;
     if(num_read % TAM_BUFFER == 0)
-      copy_to_user(localbuffer, b+num_read, TAM_BUFFER);
+      copy_to_user(localbuffer, b + num_read, TAM_BUFFER);
   }
 
   if(num_read % TAM_BUFFER != 0)
@@ -262,4 +262,9 @@ int sys_get_stats(int pid, struct stats *st)
     }
   }
   return -ESRCH; /*ESRCH */
+}
+
+int sys_gotoxy(int x, int y) {
+  printk("gotoxy");
+  return 0;
 }

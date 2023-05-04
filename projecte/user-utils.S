@@ -114,3 +114,18 @@ ENTRY(read)
 	js nok	// if (eax < 0) -> 
 	popl %ebp
 	ret
+
+/* int gotoxy(int x, int y) */
+ENTRY(gotoxy)
+	pushl %ebp
+	movl %esp, %ebp
+	pushl %ebx;  // Save EBX, ESI and EDI if modified
+	movl $22, %eax
+	movl 0x8(%ebp), %ebx;	//x
+	movl 0xC(%ebp), %ecx;	//y
+	call syscall_sysenter
+	popl %ebx
+	test %eax, %eax
+	js nok	// if (eax < 0) -> 
+	popl %ebp
+	ret

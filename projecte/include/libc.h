@@ -30,4 +30,6 @@ int yield();
 
 int get_stats(int pid, struct stats *st);
 
+int gotoxy(int x, int y);
+
 #endif  /* __LIBC_H__ */
