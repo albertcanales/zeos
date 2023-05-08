@@ -36,4 +36,6 @@ int set_color(int fg, int bg);
 
 void* shmat(int id, void* addr);
 
+int print_us(char* str);
+
 #endif  /* __LIBC_H__ */

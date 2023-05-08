@@ -51,3 +51,7 @@ void perror()
 
   write(1, buffer, strlen(buffer));
 }
+
+int print_us(char* str) {
+  return write(1, str, strlen(str));
+}

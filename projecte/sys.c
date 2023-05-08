@@ -106,6 +106,44 @@ int sys_fork(void)
     }
   }
 
+  /* Allocate pages for SHARED */
+  for(int frame = 0; frame < SHARED_FRAMES; frame++) {
+    for(int page = 0; page < current()->shared_frames_references[frame]; page++) {
+      new_ph_pag=alloc_frame();
+      if (new_ph_pag!=-1) /* One page allocated */
+      {
+        set_ss_pag(process_PT, current()->logical_pages_shared_frames[frame][page], new_ph_pag);
+      }
+      else /* No more free pages left. Deallocate everything */
+      {
+        /* Deallocate DATA+STACK. */
+        for (i=0; i<pag; i++)
+        {
+          free_frame(get_frame(process_PT, PAG_LOG_INIT_DATA+i));
+          del_ss_pag(process_PT, PAG_LOG_INIT_DATA+i);
+        }
+
+        /* Deallocate SHARED */
+        for (int f = 0; f < frame; f++) {
+          for(int p = 0; p < current()->shared_frames_references[f]; p++) {
+            free_frame(get_frame(process_PT, current()->logical_pages_shared_frames[f][p]));
+            del_ss_pag(process_PT, current()->logical_pages_shared_frames[f][p]);
+          }
+        }
+        for(int p = 0; p < page; p++) {
+          free_frame(get_frame(process_PT, current()->logical_pages_shared_frames[frame][p]));
+          del_ss_pag(process_PT, current()->logical_pages_shared_frames[frame][p]);
+        }
+
+        /* Deallocate task_struct */
+        list_add_tail(lhcurrent, &freequeue);
+        
+        /* Return error */
+        return -EAGAIN; 
+      }
+    }
+  }
+
   /* Copy parent's SYSTEM and CODE to child. */
   page_table_entry *parent_PT = get_PT(current());
   for (pag=0; pag<NUM_PAG_KERNEL; pag++)
@@ -116,6 +154,14 @@ int sys_fork(void)
   {
     set_ss_pag(process_PT, PAG_LOG_INIT_CODE+pag, get_frame(parent_PT, PAG_LOG_INIT_CODE+pag));
   }
+
+  /* Copy parent's SHARED to child. */
+  for(int frame = 0; frame < SHARED_FRAMES; frame++) {
+    for(int page = 0; page < current()->shared_frames_references[frame]; page++) {
+      set_ss_pag(process_PT, current()->logical_pages_shared_frames[frame][page], shared_phys_mem[frame]);
+    }
+  }
+
   /* Copy parent's DATA to child. We will use TOTAL_PAGES-1 as a temp logical page to map to */
   for (pag=NUM_PAG_KERNEL+NUM_PAG_CODE; pag<NUM_PAG_KERNEL+NUM_PAG_CODE+NUM_PAG_DATA; pag++)
   {
@@ -279,10 +325,12 @@ int sys_set_color(int fg, int bg) {
 void* sys_shmat(int id, void* addr) {
   if (id < 0 || id >= SHARED_FRAMES || (int)addr % PAGE_SIZE != 0)
     return (void*)-EINVAL;
+  if(current()->shared_frames_references[id] == LOGICAL_PAGES_PER_SHARED_FRAME)
+    return (void*)-ENOMEM;
 
   if(addr == NULL || get_frame(get_PT(current()), PH_PAGE((int)addr))) {
     
-    int page = get_first_free_page(get_PT(current()), PH_PAGE((int)addr));
+    int page = get_first_free_page(get_PT(current()));
     if(page < 0)
       return (void*)-ENOMEM;
     addr = (void*) (page * PAGE_SIZE);
@@ -290,6 +338,10 @@ void* sys_shmat(int id, void* addr) {
   }
 
   set_ss_pag(get_PT(current()), PH_PAGE((int)addr), shared_phys_mem[id]);
+  
+  // Afegir la referencia al vector de la tasca
+  int* references = &current()->shared_frames_references[id];
+  current()->logical_pages_shared_frames[id][*references++] = PH_PAGE((int)addr); 
 
   return addr;
 }
