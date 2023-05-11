@@ -159,3 +159,31 @@ ENTRY(shmat)
 	js nok	// if (eax < 0) -> 
 	popl %ebp
 	ret
+
+/* int shmdt(void* addr) */
+ENTRY(shmdt)
+	pushl %ebp
+	movl %esp, %ebp
+	pushl %ebx;  // Save EBX, ESI and EDI if modified
+	movl $31, %eax
+	movl 0x8(%ebp), %ebx;	//addr
+	call syscall_sysenter
+	popl %ebx
+	test %eax, %eax
+	js nok	// if (eax < 0) -> 
+	popl %ebp
+	ret
+
+/* int shmrm(int id) */
+ENTRY(shmrm)
+	pushl %ebp
+	movl %esp, %ebp
+	pushl %ebx;  // Save EBX, ESI and EDI if modified
+	movl $32, %eax
+	movl 0x8(%ebp), %ebx;	//id
+	call syscall_sysenter
+	popl %ebx
+	test %eax, %eax
+	js nok	// if (eax < 0) -> 
+	popl %ebp
+	ret

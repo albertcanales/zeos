@@ -312,3 +312,17 @@ void* sys_shmat(int id, void* addr) {
 
   return addr;
 }
+
+int sys_shmdt(void* addr) {
+  if(PH_PAGE((int)addr) >= PAG_LOG_INIT_DATA+NUM_PAG_DATA && get_frame(get_PT(current()), PH_PAGE((int)addr)))
+    return -EFAULT;
+  // TODO
+  return 0;
+}
+
+int sys_shmrm(int id) {
+  if (id < 0 || id >= SHARED_FRAMES)
+    return -EINVAL;
+  shared_frames[id].del = 1;
+  return 0;
+}

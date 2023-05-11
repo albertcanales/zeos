@@ -33,8 +33,8 @@ ENTRY (sys_call_table)
 	.long sys_ni_syscall	//28
 	.long sys_ni_syscall	//29
 	.long sys_shmat			//30
-	.long sys_ni_syscall	//31
-	.long sys_ni_syscall	//32
+	.long sys_shmdt			//31
+	.long sys_shmrm			//32
 	.long sys_ni_syscall	//33
 	.long sys_ni_syscall	//34
 	.long sys_get_stats	//35
