@@ -55,3 +55,9 @@ void perror()
 int print_us(char* str) {
   return write(1, str, strlen(str));
 }
+
+int print_num(int num) {
+  char buff[10];
+  itoa(num, buff);
+  return write(1, buff, strlen(buff));
+}

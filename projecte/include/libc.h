@@ -39,5 +39,6 @@ int shmdt(void* addr);
 int shmrm(int id);
 
 int print_us(char* str);
+int print_num(int num);
 
 #endif  /* __LIBC_H__ */

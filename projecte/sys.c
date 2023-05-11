@@ -232,38 +232,6 @@ int sys_gettime()
   return zeos_ticks;
 }
 
-void sys_exit()
-{  
-  int i;
-
-  page_table_entry *process_PT = get_PT(current());
-
-  // Deallocate all the propietary physical pages
-  for (i=0; i<NUM_PAG_DATA; i++)
-  {
-    free_frame(get_frame(process_PT, PAG_LOG_INIT_DATA+i));
-    del_ss_pag(process_PT, PAG_LOG_INIT_DATA+i);
-  }
-
-  for(int page = PAG_LOG_INIT_DATA+NUM_PAG_DATA; page < TOTAL_PAGES; page++) {
-    int frame = get_frame(process_PT, page);
-    if(frame) {
-      del_ss_pag(process_PT, page);
-      for(int i = 0; i < SHARED_FRAMES; i++)
-        if(shared_frames[i].id == frame)
-          shared_frames[i].ref--;
-    }
-  }
-  
-  /* Free task_struct */
-  list_add_tail(&(current()->list), &freequeue);
-  
-  current()->PID=-1;
-  
-  /* Restarts execution of the next process */
-  sched_next_rr();
-}
-
 /* System call to force a task switch */
 int sys_yield()
 {
@@ -324,9 +292,32 @@ void* sys_shmat(int id, void* addr) {
 }
 
 int sys_shmdt(void* addr) {
-  if(PH_PAGE((int)addr) >= PAG_LOG_INIT_DATA+NUM_PAG_DATA && get_frame(get_PT(current()), PH_PAGE((int)addr)))
+  if((int)addr % PAGE_SIZE > 0)
+    return -EINVAL;
+  if(PH_PAGE((int)addr) >= PAG_LOG_INIT_DATA+NUM_PAG_DATA)
     return -EFAULT;
-  // TODO
+  int frame = get_frame(get_PT(current()), PH_PAGE((int)addr));
+  if(!frame)
+    return -EFAULT;
+
+  for(int i = 0; i < SHARED_FRAMES; i++)
+  if(shared_frames[i].id == frame) {
+    shared_frames[i].ref--;
+
+    if(shared_frames[i].ref == 0 && shared_frames[i].del) {
+
+      // Clear frame
+      char buffer[TAM_BUFFER];
+      for(int i = 0; i < TAM_BUFFER; i++)
+        buffer[i] = 0;
+      for(int i = 0; i < PAGE_SIZE; i += TAM_BUFFER) { // We assume TAM_BUFFER | PAGE_SIZE
+        copy_to_user(buffer, addr + i, TAM_BUFFER);
+      }
+
+      shared_frames[i].del = 0; 
+    }
+  }
+  del_ss_pag(get_PT(current()), PH_PAGE((int)addr));
   return 0;
 }
 
@@ -335,4 +326,33 @@ int sys_shmrm(int id) {
     return -EINVAL;
   shared_frames[id].del = 1;
   return 0;
+}
+
+void sys_exit()
+{  
+  int i;
+
+  page_table_entry *process_PT = get_PT(current());
+
+  // Deallocate all the propietary physical pages
+  for (i=0; i<NUM_PAG_DATA; i++)
+  {
+    free_frame(get_frame(process_PT, PAG_LOG_INIT_DATA+i));
+    del_ss_pag(process_PT, PAG_LOG_INIT_DATA+i);
+  }
+
+  for(int page = PAG_LOG_INIT_DATA+NUM_PAG_DATA; page < TOTAL_PAGES; page++) {
+    int frame = get_frame(process_PT, page);
+    if(frame) {
+      sys_shmdt((void*)(page * PAGE_SIZE));
+    }
+  }
+  
+  /* Free task_struct */
+  list_add_tail(&(current()->list), &freequeue);
+  
+  current()->PID=-1;
+  
+  /* Restarts execution of the next process */
+  sched_next_rr();
 }
