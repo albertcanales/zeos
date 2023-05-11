@@ -10,7 +10,7 @@
 
 Byte phys_mem[TOTAL_PAGES];
 
-Byte shared_phys_mem[SHARED_FRAMES];
+struct shared_frame shared_frames[SHARED_FRAMES];
 
 /* SEGMENTATION */
 /* Memory segements description table */
@@ -134,7 +134,9 @@ void set_pe_flag()
 
 void init_shared_frames() {
   for(int i = 0; i < SHARED_FRAMES; i++) {
-    shared_phys_mem[i] = alloc_frame();
+    shared_frames[i].id = alloc_frame();
+    shared_frames[i].ref = 0;
+    shared_frames[i].del = 0;
   }
 }
 

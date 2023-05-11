@@ -24,8 +24,6 @@ struct task_struct {
   enum state_t state;		/* State of the process */
   int total_quantum;		/* Total quantum of the process */
   struct stats p_stats;		/* Process stats */
-  int shared_frames_references[SHARED_FRAMES];  /* How many logical pages assigned to each shared frame */
-  int logical_pages_shared_frames[SHARED_FRAMES][LOGICAL_PAGES_PER_SHARED_FRAME]; /* The logical pages assigned to each shared frame */
 };
 
 union task_union {

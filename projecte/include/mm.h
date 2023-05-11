@@ -14,7 +14,14 @@
 #define USED_FRAME 1
 /* Bytemap to mark the free physical pages */
 extern Byte phys_mem[TOTAL_PAGES];
-extern Byte shared_phys_mem[SHARED_FRAMES];
+
+struct shared_frame {
+	Byte id;
+	int ref;
+	Byte del;
+};
+
+extern struct shared_frame shared_frames[SHARED_FRAMES];
 
 extern page_table_entry dir_pages[NR_TASKS][TOTAL_PAGES];
 

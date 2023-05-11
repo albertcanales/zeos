@@ -2,6 +2,7 @@
 #include <types.h>
 
 #include <mm_address.h>
+#include <mm.h>
 
 void copy_data(void *start, void *dest, int size)
 {
@@ -81,6 +82,13 @@ int access_ok(int type, const void * addr, unsigned long size)
       if ((addr_ini>=USER_FIRST_PAGE)&&
   	(addr_fin<=(USER_FIRST_PAGE+NUM_PAG_CODE+NUM_PAG_DATA)))
           return 1;
+    if(addr_ini >= USER_FIRST_PAGE+NUM_PAG_CODE+NUM_PAG_DATA && addr_fin <= TOTAL_PAGES) {
+      for(int i = PH_PAGE(addr_ini); i < PH_PAGE(addr_fin); i++) {
+        if(!get_frame(get_PT(current()), i))
+          return 0;
+      }
+      return 1;
+    }
   }
   return 0;
 }
