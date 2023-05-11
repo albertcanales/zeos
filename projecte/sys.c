@@ -244,6 +244,16 @@ void sys_exit()
     free_frame(get_frame(process_PT, PAG_LOG_INIT_DATA+i));
     del_ss_pag(process_PT, PAG_LOG_INIT_DATA+i);
   }
+
+  for(int page = PAG_LOG_INIT_DATA+NUM_PAG_DATA; page < TOTAL_PAGES; page++) {
+    int frame = get_frame(process_PT, page);
+    if(frame) {
+      del_ss_pag(process_PT, page);
+      for(int i = 0; i < SHARED_FRAMES; i++)
+        if(shared_frames[i].id == frame)
+          shared_frames[i].ref--;
+    }
+  }
   
   /* Free task_struct */
   list_add_tail(&(current()->list), &freequeue);
