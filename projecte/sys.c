@@ -117,31 +117,27 @@ int sys_fork(void)
     set_ss_pag(process_PT, PAG_LOG_INIT_CODE+pag, get_frame(parent_PT, PAG_LOG_INIT_CODE+pag));
   }
 
-  /* Copy parent's SHARED to child. */
-  for (pag=NUM_PAG_KERNEL+NUM_PAG_CODE+NUM_PAG_DATA; pag<TOTAL_PAGES; pag++)
-  {
-    if(get_frame(parent_PT, pag)) {
-      set_ss_pag(process_PT, pag, get_frame(parent_PT, pag));
-      del_ss_pag(parent_PT, pag);
-    }
-  }
-
   /* Copy parent's DATA to child. We will use TOTAL_PAGES-1 as a temp logical page to map to */
   for (pag=NUM_PAG_KERNEL+NUM_PAG_CODE; pag<NUM_PAG_KERNEL+NUM_PAG_CODE+NUM_PAG_DATA; pag++)
   {
     /* Map one child page to parent's address space. */
-    set_ss_pag(parent_PT, pag+NUM_PAG_DATA, get_frame(process_PT, pag));
-    copy_data((void*)(pag<<12), (void*)((pag+NUM_PAG_DATA)<<12), PAGE_SIZE);
-    del_ss_pag(parent_PT, pag+NUM_PAG_DATA);
+    set_ss_pag(parent_PT, TOTAL_PAGES-1, get_frame(process_PT, pag));
+    copy_data((void*)(pag<<12), (void*)((TOTAL_PAGES-1)<<12), PAGE_SIZE);
+    del_ss_pag(parent_PT, TOTAL_PAGES-1);
   }
   /* Deny access to the child's memory space */
   set_cr3(get_DIR(current()));
 
-  /* Copy child's SHARED to parent. */
-  for (pag=NUM_PAG_KERNEL+NUM_PAG_CODE+NUM_PAG_DATA; pag<TOTAL_PAGES; pag++)
+  /* Copy parent's SHARED to child. */
+  for (pag=NUM_PAG_KERNEL+NUM_PAG_CODE+NUM_PAG_DATA; pag<TOTAL_PAGES-1; pag++)
   {
     if(get_frame(process_PT, pag)) {
-      set_ss_pag(parent_PT, pag, get_frame(process_PT, pag));
+      set_ss_pag(process_PT, pag, get_frame(parent_PT, pag));
+
+      // Increment number of references
+      for(int i = 0; i < SHARED_FRAMES; i++)
+        if(shared_frames[i].id == get_frame(process_PT, pag))
+          shared_frames[i].id++;
     }
   }
 

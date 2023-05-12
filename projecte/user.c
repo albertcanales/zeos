@@ -10,31 +10,34 @@ int __attribute__ ((__section__(".text.main")))
     /* Next line, tries to move value 0 to CR3 register. This register is a privileged one, and so it will raise an exception */
      /* __asm__ __volatile__ ("mov %0, %%cr3"::"r" (0) ); */
 
-  char funciona[] = "Funciona!!!";
-  char nofunciona[] = "No funciona :(";
-  if(fork() == 0) {
-    int* val = shmat(2, (void*)0);
-    *val = 25;
-    shmrm(2);
-    
-    int ret = fork();
-    print_num(ret);
-    if(ret > 0) {
-      print_us("Soc el pare\n");
-      // shmdt(val);
-    }
-    else {
-      shmdt(val);
-      int* val2 = shmat(2, (void*) 0);
-      if(*val2 == 0) {
-        write(1, funciona, strlen(funciona));
+  int* shared[1024];
+
+  int i = 0;
+  while(i < 512) {
+    shared[i] = shmat(2, (void*)0);
+    *shared[i] = 1234;
+    i++;
+  }
+  print_num(i);
+  write(1, "\n", 1);
+
+  char error[] = "Se ha machacado!!";
+  char done[] = "He acabat";
+  int ret = fork();
+  if(ret > 0) {
+    for(int j = 0; j < i; j++) {
+      if(*shared[j] != 1234) {
+        write(1, error, strlen(error));
+        print_num(j);
+        write(1, " ", strlen(" "));
+        print_num(*shared[j]);
+        write(1, "\n", strlen("\n"));
       }
-      else {
-        write(1, nofunciona, strlen(nofunciona));
-        print_num(*val2);
-      }
-      // print_num(3);
     }
+    write(1, done, strlen(done));
+  }
+  else {
+    write(1, "Fill", 4);
   }
 
   while(1);
