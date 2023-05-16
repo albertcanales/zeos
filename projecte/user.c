@@ -23,6 +23,8 @@ int __attribute__ ((__section__(".text.main")))
 
   char error[] = "Se ha machacado!!";
   char done[] = "He acabat";
+  char fill[] = "Soc el fill";
+  
   int ret = fork();
   if(ret > 0) {
     for(int j = 0; j < i; j++) {
@@ -37,7 +39,7 @@ int __attribute__ ((__section__(".text.main")))
     write(1, done, strlen(done));
   }
   else {
-    write(1, "Fill", 4);
+    write(1, fill, strlen(fill));
   }
 
   while(1);

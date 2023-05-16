@@ -279,7 +279,7 @@ unsigned int get_frame (page_table_entry *PT, unsigned int logical_page){
 }
 
 int get_first_free_page(page_table_entry *PT) {
-  for(int i = 1; i < TOTAL_PAGES-1; i++)
+  for(int i = PAG_LOG_INIT_DATA+NUM_PAG_DATA; i < TOTAL_PAGES; i++)
     if(!get_frame(PT, i))
       return i;
   return -1;
