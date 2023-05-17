@@ -291,7 +291,7 @@ void* sys_shmat(int id, void* addr) {
 int sys_shmdt(void* addr) {
   if((int)addr % PAGE_SIZE > 0)
     return -EINVAL;
-  if(PH_PAGE((int)addr) >= PAG_LOG_INIT_DATA+NUM_PAG_DATA)
+  if(PH_PAGE((int)addr) < PAG_LOG_INIT_DATA+NUM_PAG_DATA)
     return -EFAULT;
   int frame = get_frame(get_PT(current()), PH_PAGE((int)addr));
   if(!frame)
@@ -302,7 +302,6 @@ int sys_shmdt(void* addr) {
     shared_frames[i].ref--;
 
     if(shared_frames[i].ref == 0 && shared_frames[i].del) {
-
       // Clear frame
       char buffer[TAM_BUFFER];
       for(int i = 0; i < TAM_BUFFER; i++)
