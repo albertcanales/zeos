@@ -17,4 +17,6 @@ void printk(char *string);
 int setxy(int new_x, int new_y);
 int set_col(int new_fg, int new_bg);
 
+void zeos_show_performance(int diff);
+
 #endif  /* __IO_H__ */
