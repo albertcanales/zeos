@@ -130,7 +130,6 @@ int sys_fork(void)
   }
 
   /* Copy parent's SHARED to child. */
-  /*
   for (pag=NUM_PAG_KERNEL+NUM_PAG_CODE+NUM_PAG_DATA; pag < TOTAL_PAGES-1; pag++)
   {
     if(get_frame(parent_PT, pag)) {
@@ -142,7 +141,6 @@ int sys_fork(void)
           shared_frames[i].ref++;
     }
   }
-  */
 
   uchild->task.PID=++global_PID;
   uchild->task.state=ST_READY;
