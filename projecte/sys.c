@@ -302,15 +302,9 @@ int sys_shmdt(void* addr) {
     shared_frames[i].ref--;
 
     if(shared_frames[i].ref == 0 && shared_frames[i].del) {
-      // Clear frame
-      char buffer[TAM_BUFFER];
-      for(int i = 0; i < TAM_BUFFER; i++)
-        buffer[i] = 0;
-      for(int i = 0; i < PAGE_SIZE; i += TAM_BUFFER) { // We assume TAM_BUFFER | PAGE_SIZE
-        copy_to_user(buffer, addr + i, TAM_BUFFER);
+      for(int i = 0; i < PAGE_SIZE / sizeof(int); i++) {
+        ((int*)addr)[i] = 0;
       }
-
-      shared_frames[i].del = 0; 
     }
   }
   del_ss_pag(get_PT(current()), PH_PAGE((int)addr));
