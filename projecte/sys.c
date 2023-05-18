@@ -80,34 +80,10 @@ int sys_fork(void)
   /* new pages dir */
   allocate_DIR((struct task_struct*)uchild);
 
-  /* Allocate pages for DATA+STACK */
-  int new_ph_pag, pag, i;
-  page_table_entry *process_PT = get_PT(&uchild->task);
-  for (pag=0; pag<NUM_PAG_DATA; pag++)
-  {
-    new_ph_pag=alloc_frame();
-    if (new_ph_pag!=-1) /* One page allocated */
-    {
-      set_ss_pag(process_PT, PAG_LOG_INIT_DATA+pag, new_ph_pag);
-    }
-    else /* No more free pages left. Deallocate everything */
-    {
-      /* Deallocate allocated pages. Up to pag. */
-      for (i=0; i<pag; i++)
-      {
-        free_frame(get_frame(process_PT, PAG_LOG_INIT_DATA+i));
-        del_ss_pag(process_PT, PAG_LOG_INIT_DATA+i);
-      }
-      /* Deallocate task_struct */
-      list_add_tail(lhcurrent, &freequeue);
-      
-      /* Return error */
-      return -EAGAIN; 
-    }
-  }
-
   /* Copy parent's SYSTEM and CODE to child. */
+  int pag;
   page_table_entry *parent_PT = get_PT(current());
+  page_table_entry *process_PT = get_PT(&uchild->task);
   for (pag=0; pag<NUM_PAG_KERNEL; pag++)
   {
     set_ss_pag(process_PT, pag, get_frame(parent_PT, pag));
@@ -117,16 +93,12 @@ int sys_fork(void)
     set_ss_pag(process_PT, PAG_LOG_INIT_CODE+pag, get_frame(parent_PT, PAG_LOG_INIT_CODE+pag));
   }
 
-  /* Copy parent's DATA to child. We will use TOTAL_PAGES-1 as a temp logical page to map to */
-  for (pag=NUM_PAG_KERNEL+NUM_PAG_CODE; pag<NUM_PAG_KERNEL+NUM_PAG_CODE+NUM_PAG_DATA; pag++)
+  /* Same for DATA, but marking it as read-only */
+  for (pag=0; pag<NUM_PAG_DATA; pag++)
   {
-    /* Map one child page to parent's address space. */
-    set_ss_pag(parent_PT, TOTAL_PAGES-1, get_frame(process_PT, pag));
-    copy_data((void*)(pag<<12), (void*)((TOTAL_PAGES-1)<<12), PAGE_SIZE);
-    del_ss_pag(parent_PT, TOTAL_PAGES-1);
-    
-    /* Deny access to the child's memory space */
-    set_cr3(get_DIR(current()));
+    set_ss_pag(process_PT, PAG_LOG_INIT_DATA+pag, get_frame(parent_PT, PAG_LOG_INIT_DATA+pag));
+    process_PT[PAG_LOG_INIT_DATA+pag].bits.rw=0;
+    parent_PT[PAG_LOG_INIT_DATA+pag].bits.rw=0;
   }
 
   /* Copy parent's SHARED to child. */
