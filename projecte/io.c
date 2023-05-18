@@ -80,16 +80,3 @@ int set_col(int new_fg, int new_bg) {
   bg = new_bg;
   return 0;
 }
-
-void zeos_show_performance(int diff) {
-  for(int i = 0; i < 10; i++) {
-    char c = '0'+(diff % 10);
-    if(diff == 0 && c == '0')
-      c = ' ';
-    diff /= 10;
-    // Copy of part of printc code to avoid bochs debugging
-    Word ch = (Word) (c & 0x00FF) | 2<<8 | 0<<12;
-    Word *screen = (Word *)0xb8000;
-    screen[NUM_COLUMNS-1-i] = ch;
-  }
-}

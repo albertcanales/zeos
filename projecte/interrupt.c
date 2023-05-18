@@ -73,15 +73,8 @@ void my_page_fault_routine(unsigned int error, unsigned int eip) {
   while(1);
 }
 
-unsigned long last_real_ticks;
-
 void clock_routine()
 {
-  unsigned long now_ticks = get_ticks();
-  int diff = (int)(now_ticks - last_real_ticks);
-  last_real_ticks = now_ticks;
-  zeos_show_performance(diff);
-
   // zeos_show_clock();
   zeos_ticks ++;
   

@@ -32,6 +32,16 @@ void itoa(int a, char *b)
   b[i]=0;
 }
 
+void ftoa(int a, char *b)
+{
+  // a = 25.02f;
+  itoa(a/100, b);
+  int len = strlen(b);
+  b[len] = '.';
+  itoa(a%100, b+len+1);
+  b[len+3] = '0';
+}
+
 int strlen(char *a)
 {
   int i;
@@ -60,4 +70,8 @@ int print_num(int num) {
   char buff[10];
   itoa(num, buff);
   return write(1, buff, strlen(buff));
+}
+
+float getfps(int frames) {
+  return 18*frames/gettime();
 }
