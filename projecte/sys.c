@@ -99,6 +99,7 @@ int sys_fork(void)
     set_ss_pag(process_PT, PAG_LOG_INIT_DATA+pag, get_frame(parent_PT, PAG_LOG_INIT_DATA+pag));
     process_PT[PAG_LOG_INIT_DATA+pag].bits.rw=0;
     parent_PT[PAG_LOG_INIT_DATA+pag].bits.rw=0;
+    phys_mem[get_frame(parent_PT, PAG_LOG_INIT_DATA+pag)]++;
   }
 
   /* Copy parent's SHARED to child. */

@@ -22,8 +22,10 @@ int __attribute__ ((__section__(".text.main")))
      /* __asm__ __volatile__ ("mov %0, %%cr3"::"r" (0) ); */
 
   char *a = "a";
-  fork();
-  *a = 'b';
+  if(fork() > 0)
+    *a = 'b';
+  else
+    *a = 'c';
   write(1, a, 1);
   while(1);
 }

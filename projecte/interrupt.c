@@ -10,6 +10,7 @@
 #include <sched.h>
 #include <utils.h>
 #include <mm_address.h>
+#include <mm.h>
 
 #include <zeos_interrupt.h>
 
@@ -77,8 +78,33 @@ void itoh(int a, char *b)
 void my_page_fault_routine(unsigned int error, unsigned int eip) {
   unsigned int address = read_cr2();
   if(PH_PAGE(address) >= PAG_LOG_INIT_DATA && PH_PAGE(address) < PAG_LOG_INIT_DATA+NUM_PAG_DATA) {
-    printk("This address is on COW\n");
-    while(1);
+    
+    page_table_entry *current_PT = get_PT(current());
+    if(get_frame(current_PT, PH_PAGE(address)) > 1) {
+      // Allocate frame
+      int frame = alloc_frame();
+      if (frame != -1)
+      {
+        set_ss_pag(current_PT, TOTAL_PAGES-1, frame);
+      }
+      else /* No more free pages left. Deallocate everything */
+      {
+          printk("\nCould not allocate extra frame\n");
+          while(1);
+      }
+
+      // Copy page
+      copy_data((void*)(address<<12>>12), (void*)((TOTAL_PAGES-1)<<12), PAGE_SIZE);
+      phys_mem[get_frame(current_PT, PH_PAGE(address))]--;
+      del_ss_pag(current_PT, PH_PAGE(address));
+      del_ss_pag(current_PT, TOTAL_PAGES-1);
+      set_ss_pag(current_PT, PH_PAGE(address), frame);
+      set_cr3(get_DIR(current()));
+    }
+    else {
+      current_PT[PH_PAGE(address)].bits.rw=1;
+    }
+
   }
   else {
     char seip[16], saddress[16];
