@@ -9,8 +9,18 @@
 #include <buffer.h>
 #include <sched.h>
 #include <utils.h>
+#include <mm_address.h>
 
 #include <zeos_interrupt.h>
+
+/* Macro for reading the CR2 register */
+#define read_cr2() ({ \
+         unsigned int __dummy; \
+         __asm__( \
+                 "movl %%cr2,%0\n\t" \
+                 :"=r" (__dummy)); \
+         __dummy; \
+})
 
 Gate idt[IDT_ENTRIES];
 Register    idtR;
@@ -65,12 +75,22 @@ void itoh(int a, char *b)
 
 
 void my_page_fault_routine(unsigned int error, unsigned int eip) {
-  char seip[16];
-  itoh(eip, seip);
-  printk("\nProcess generates a PAGE FAULT exception at EIP :0x");
-  printk(seip);
-  printk("\n");
-  while(1);
+  unsigned int address = read_cr2();
+  if(PH_PAGE(address) >= PAG_LOG_INIT_DATA && PH_PAGE(address) < PAG_LOG_INIT_DATA+NUM_PAG_DATA) {
+    printk("This address is on COW\n");
+    while(1);
+  }
+  else {
+    char seip[16], saddress[16];
+    itoh(eip, seip);
+    printk("\nProcess generates a PAGE FAULT exception at EIP :0x");
+    printk(seip);
+    printk(" for address 0x");
+    itoh(address, saddress);
+    printk(saddress);
+    printk("\n");
+    while(1);
+  }
 }
 
 void clock_routine()
