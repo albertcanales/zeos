@@ -15,17 +15,20 @@ void update_fps() {
   frames++;
 }
 
+char a[] = "a";
+
 int __attribute__ ((__section__(".text.main")))
   main(void)
 {
     /* Next line, tries to move value 0 to CR3 register. This register is a privileged one, and so it will raise an exception */
      /* __asm__ __volatile__ ("mov %0, %%cr3"::"r" (0) ); */
 
-  char *a = "a";
-  if(fork() > 0)
+  if(fork() > 0) {
     *a = 'b';
-  else
+    write(1, a, 1);
+  }
+  else {
     *a = 'c';
-  write(1, a, 1);
+  }
   while(1);
 }

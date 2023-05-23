@@ -80,7 +80,7 @@ void my_page_fault_routine(unsigned int error, unsigned int eip) {
   if(PH_PAGE(address) >= PAG_LOG_INIT_DATA && PH_PAGE(address) < PAG_LOG_INIT_DATA+NUM_PAG_DATA) {
     
     page_table_entry *current_PT = get_PT(current());
-    if(get_frame(current_PT, PH_PAGE(address)) > 1) {
+    if(phys_mem[get_frame(current_PT, PH_PAGE(address))] > 1) {
       // Allocate frame
       int frame = alloc_frame();
       if (frame != -1)
@@ -98,8 +98,8 @@ void my_page_fault_routine(unsigned int error, unsigned int eip) {
       phys_mem[get_frame(current_PT, PH_PAGE(address))]--;
       del_ss_pag(current_PT, PH_PAGE(address));
       del_ss_pag(current_PT, TOTAL_PAGES-1);
-      set_ss_pag(current_PT, PH_PAGE(address), frame);
       set_cr3(get_DIR(current()));
+      set_ss_pag(current_PT, PH_PAGE(address), frame);
     }
     else {
       current_PT[PH_PAGE(address)].bits.rw=1;

@@ -70,7 +70,17 @@
       outb %al, $0x20;
 
 ENTRY(my_page_fault_handler)
-      call my_page_fault_routine
+      SAVE_ALL
+      pushl %eax;
+      call user_to_system;
+      popl %eax;
+      call my_page_fault_routine;
+      pushl %eax;
+      call system_to_user;
+      popl %eax;
+      RESTORE_ALL
+      popf;
+      iret;
 
 ENTRY(clock_handler)
       SAVE_ALL
