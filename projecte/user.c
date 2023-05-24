@@ -15,8 +15,23 @@ void update_fps() {
   frames++;
 }
 
+int ended;
+
+int head_x, head_y;
 // 0 = up, 1 = left, 2 = down, 3 = right
 int* direction;
+
+#define MAX_SIZE 100
+
+int snake_x[MAX_SIZE];
+int snake_y[MAX_SIZE];
+int head, size;
+
+int apple_x, apple_y;
+
+int dx[] = {0,-1,0,1};
+int dy[] = {1,0,-1,0};
+
 
 void reader() {
   *direction = 0;
@@ -41,10 +56,27 @@ void reader() {
   }
 }
 
+void init() {
+  ended = 0;
+  head_y = 15;
+  head_x = 40;
+  size = 1;
+  head = 0;
+
+  // Reestablir snake
+  for (int i = 0; i < MAX_SIZE; i++)
+    snake_x[i] = 0;
+  for (int i = 0; i < MAX_SIZE; i++)
+    snake_y[i] = 0;
+  snake_x[0] = head_x;
+  snake_y[0] = head_y;
+}
+
 void game() {
   // Initialize snake
+  init();
+
   // Initialize screen
-  int ended = 0;
   char buff[2];
   while(!ended) {
     itoa(*direction, buff);
