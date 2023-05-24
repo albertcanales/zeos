@@ -28,8 +28,8 @@ int __attribute__ ((__section__(".text.main")))
     write(1, a, 1);
   }
   else {
-    // *a = 'c';
-    // write(1, a, 1);
+    *a = 'c';
+    write(1, a, 1);
   }
   while(1);
 }

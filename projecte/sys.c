@@ -102,6 +102,8 @@ int sys_fork(void)
     phys_mem[get_frame(parent_PT, PAG_LOG_INIT_DATA+pag)]++;
   }
 
+  set_cr3(get_DIR(current()));
+
   /* Copy parent's SHARED to child. */
   for (pag=NUM_PAG_KERNEL+NUM_PAG_CODE+NUM_PAG_DATA; pag < TOTAL_PAGES-1; pag++)
   {

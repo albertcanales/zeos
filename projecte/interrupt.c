@@ -94,7 +94,7 @@ void my_page_fault_routine(unsigned int address, unsigned int error, unsigned in
       }
 
       // Copy page
-      copy_data((void*)(address<<12>>12), (void*)(new_page<<12), PAGE_SIZE);
+      copy_data((void*)((address>>12)<<12), (void*)(new_page<<12), PAGE_SIZE);
       phys_mem[get_frame(current_PT, PH_PAGE(address))]--;
       del_ss_pag(current_PT, PH_PAGE(address));
       del_ss_pag(current_PT, new_page);
