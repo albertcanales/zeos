@@ -78,9 +78,9 @@ void itoh(int a, char *b)
 void my_page_fault_routine(unsigned int error, unsigned int eip) {
   unsigned int address = read_cr2();
   if(PH_PAGE(address) >= PAG_LOG_INIT_DATA && PH_PAGE(address) < PAG_LOG_INIT_DATA+NUM_PAG_DATA) {
-    
     page_table_entry *current_PT = get_PT(current());
     if(phys_mem[get_frame(current_PT, PH_PAGE(address))] > 1) {
+      // printk("Nuevo frame");
       // Allocate frame
       int frame = alloc_frame();
       if (frame != -1)
@@ -103,13 +103,14 @@ void my_page_fault_routine(unsigned int error, unsigned int eip) {
     }
     else {
       current_PT[PH_PAGE(address)].bits.rw=1;
+      // printk("Ultima pag");
     }
 
   }
   else {
     char seip[16], saddress[16];
     itoh(eip, seip);
-    printk("\nProcess generates a PAGE FAULT exception at EIP :0x");
+    printk("\nProcess generates a PAGE FAULT exception at EIP: 0x");
     printk(seip);
     printk(" for address 0x");
     itoh(address, saddress);

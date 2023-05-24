@@ -74,7 +74,11 @@ ENTRY(my_page_fault_handler)
       pushl %eax;
       call user_to_system;
       popl %eax;
+      pushl 48(%esp);
+      pushl 44(%esp);
       call my_page_fault_routine;
+      popl 44(%esp);
+      popl 48(%esp);
       pushl %eax;
       call system_to_user;
       popl %eax;
