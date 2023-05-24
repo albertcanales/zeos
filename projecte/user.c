@@ -32,12 +32,11 @@ int head, size;
 
 int apple_x, apple_y;
 
-int dx[] = {0,-1,0,1};
+int dx[] = {0,-2,0,2};
 int dy[] = {-1,0,1,0};
 
 
 void reader() {
-  *direction = 0;
   char buff[2];
   while(1) {
     if(read(buff, 1)) {
@@ -64,23 +63,23 @@ void reader() {
 }
 
 void paint_apple() {
-  apple_x = ((apple_x + 126731) % 80);
-  apple_y = ((apple_y + 237891) % 25);
+  apple_x = ((apple_x + 126731) % 76 + 2) >> 1 << 1;
+  apple_y = ((apple_y + 237891) % 23 + 1) >> 1 << 1;
   gotoxy(apple_x, apple_y);
   set_color(0, 4);
-  write(1, " ", 1);
+  write(1, "  ", 2);
 }
 
 void paint_snake_pixel(int x, int y) {
   gotoxy(x, y);
   set_color(0, 2);
-  write(1, " ", 1);
+  write(1, "  ", 2);
 }
 
 void clear_pixel(int x, int y) {
   gotoxy(x, y);
   set_color(0, 0);
-  write(1, " ", 1);
+  write(1, "  ", 2);
 }
 
 void update_score() {
@@ -100,7 +99,7 @@ void init() {
   for (int i = 0; i < MAX_SIZE; i++) {
     if(i < size) {
       snake_x[i] = 40;
-      snake_y[i] = 15+i;
+      snake_y[i] = 19+i;
     }
     else {
       snake_x[i] = 0;
@@ -174,14 +173,23 @@ void move() {
 
     size++;
     paint_apple();
+
+    // Check that apple not in snake body
+    int colliding = 0;
+    do {
+      for (int i = 0; i < MAX_SIZE; i++)
+        if (snake_x[i] == apple_x && snake_y[i] == apple_y)
+          colliding = 1;
+    } while(colliding);
+
+
     update_score();
   }
 
   // Apply movement
   if (ended == 0) {
     head = (head + 1) % size;
-    if (snake_x[head] != apple_x || snake_y[head] != apple_y)
-      clear_pixel(snake_x[head], snake_y[head]);
+    clear_pixel(snake_x[head], snake_y[head]);
     snake_x[head] = new_head_x;
     snake_y[head] = new_head_y;
     paint_snake_pixel(snake_x[head], snake_y[head]);
@@ -195,6 +203,8 @@ void move() {
 void game() {
   // Initialize game
   init();
+  for(int i = 0; i < 4; i++)
+    move(); // dirty hack
 
   // Gaming loop
   while(!ended) {
@@ -202,8 +212,9 @@ void game() {
     if(*direction % 2 == 0)
       sleep(200);
     else
-      sleep(150);
+      sleep(250);
     update_fps();
+    // ended = 1;
   }
   // Show score screen
 }
@@ -216,10 +227,10 @@ int __attribute__ ((__section__(".text.main")))
 
   direction = shmat(1, (void*)0);
   if(fork() > 0) {
-    game();
+    reader();
   }
   else {
-    reader();
+    game();
   }
   while(1);
 }
