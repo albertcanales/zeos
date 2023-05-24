@@ -76,7 +76,10 @@ ENTRY(my_page_fault_handler)
       popl %eax;
       pushl 48(%esp);
       pushl 44(%esp);
+      movl %cr2, %eax
+      pushl %eax
       call my_page_fault_routine;
+      popl %eax
       popl 44(%esp);
       popl 48(%esp);
       pushl %eax;

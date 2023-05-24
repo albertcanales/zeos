@@ -82,7 +82,7 @@ int access_ok(int type, const void * addr, unsigned long size)
       if ((addr_ini>=USER_FIRST_PAGE)&&
   	(addr_fin<=(USER_FIRST_PAGE+NUM_PAG_CODE+NUM_PAG_DATA)))
           return 1;
-    if(addr_ini >= USER_FIRST_PAGE+NUM_PAG_CODE+NUM_PAG_DATA && addr_fin <= TOTAL_PAGES) {
+    if(addr_ini >= USER_FIRST_PAGE+NUM_PAG_CODE+NUM_PAG_DATA && addr_fin < TOTAL_PAGES-1) {
       for(int i = PH_PAGE(addr_ini); i < PH_PAGE(addr_fin); i++) {
         if(!get_frame(get_PT(current()), i))
           return 0;

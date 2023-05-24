@@ -48,7 +48,7 @@ int zeos_ticks = 0;
 struct circular_buffer keyboard_buffer;
 
 // Return string of hex representation from int
-void itoh(int a, char *b)
+void itoh(unsigned int a, char *b)
 {
   char* keys = "0123456789ABCDEF";
 
@@ -74,18 +74,18 @@ void itoh(int a, char *b)
   b[i]=0;
 }
 
-
-void my_page_fault_routine(unsigned int error, unsigned int eip) {
-  unsigned int address = read_cr2();
+void my_page_fault_routine(unsigned int address, unsigned int error, unsigned int eip) {
+  // unsigned int my_address = read_cr2();
   if(PH_PAGE(address) >= PAG_LOG_INIT_DATA && PH_PAGE(address) < PAG_LOG_INIT_DATA+NUM_PAG_DATA) {
     page_table_entry *current_PT = get_PT(current());
     if(phys_mem[get_frame(current_PT, PH_PAGE(address))] > 1) {
       // printk("Nuevo frame");
       // Allocate frame
       int frame = alloc_frame();
+      int new_page = get_first_free_page(current_PT);
       if (frame != -1)
       {
-        set_ss_pag(current_PT, TOTAL_PAGES-1, frame);
+        set_ss_pag(current_PT, new_page, frame);
       }
       else /* No more free pages left. Deallocate everything */
       {
@@ -94,10 +94,10 @@ void my_page_fault_routine(unsigned int error, unsigned int eip) {
       }
 
       // Copy page
-      copy_data((void*)(address<<12>>12), (void*)((TOTAL_PAGES-1)<<12), PAGE_SIZE);
+      copy_data((void*)(address<<12>>12), (void*)(new_page<<12), PAGE_SIZE);
       phys_mem[get_frame(current_PT, PH_PAGE(address))]--;
       del_ss_pag(current_PT, PH_PAGE(address));
-      del_ss_pag(current_PT, TOTAL_PAGES-1);
+      del_ss_pag(current_PT, new_page);
       set_cr3(get_DIR(current()));
       set_ss_pag(current_PT, PH_PAGE(address), frame);
     }
@@ -110,10 +110,10 @@ void my_page_fault_routine(unsigned int error, unsigned int eip) {
   else {
     char seip[16], saddress[16];
     itoh(eip, seip);
+    itoh(address, saddress);
     printk("\nProcess generates a PAGE FAULT exception at EIP: 0x");
     printk(seip);
     printk(" for address 0x");
-    itoh(address, saddress);
     printk(saddress);
     printk("\n");
     while(1);
