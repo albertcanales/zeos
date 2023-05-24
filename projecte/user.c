@@ -17,9 +17,8 @@ void update_fps() {
 
 int ended;
 
-int head_x, head_y;
 // 0 = up, 1 = left, 2 = down, 3 = right
-int* direction;
+int *direction;
 
 #define MAX_SIZE 100
 
@@ -40,47 +39,73 @@ void reader() {
     if(read(buff, 1)) {
       switch(*buff) {
         case 'w':
-          *direction = 0;
+          if(*direction != 2)
+            *direction = 0;
           break;
         case 'a':
-          *direction = 1;
+          if(*direction != 3)
+            *direction = 1;
           break;
         case 's':
-          *direction = 2;
+          if(*direction != 0)
+            *direction = 2;
           break;
         case 'd':
-          *direction = 3;
+          if(*direction != 1)
+            *direction = 3;
           break;
       }
     }
   }
 }
 
+void paint_apple() {
+  apple_x = ((apple_x + 126731) % 80);
+  apple_y = ((apple_y + 237891) % 25);
+  gotoxy(apple_x, apple_y);
+  write(1, "X", 1);
+}
+
+void paint_snake_pixel(int x, int y) {
+  gotoxy(x, y);
+  write(1, "O", 1);
+}
+
 void init() {
   ended = 0;
-  head_y = 15;
-  head_x = 40;
-  size = 1;
+  size = 4;
   head = 0;
 
-  // Reestablir snake
-  for (int i = 0; i < MAX_SIZE; i++)
-    snake_x[i] = 0;
-  for (int i = 0; i < MAX_SIZE; i++)
-    snake_y[i] = 0;
-  snake_x[0] = head_x;
-  snake_y[0] = head_y;
+  // Inciar snake
+  for (int i = 0; i < MAX_SIZE; i++) {
+    if(i < 4) {
+      snake_x[i] = 40;
+      snake_y[i] = 15+i;
+    }
+    else {
+      snake_x[i] = 0;
+      snake_y[i] = 0;
+    }
+  }
+
+  // Clear screen
+  for(int i = 0; i < 80*25; i++) {
+    write(1, " ", 1);
+  }
+  // Print snake
+  for(int i = 0; i < size; i++) {
+    paint_snake_pixel(snake_x[i], snake_y[i]);
+  }
+  // Print apple
+  paint_apple();
 }
 
 void game() {
   // Initialize snake
   init();
 
-  // Initialize screen
-  char buff[2];
   while(!ended) {
-    itoa(*direction, buff);
-    write(1, buff, strlen(buff));
+
     // Move snake
     // Check collisions (itself, screen)
     // Check apples
