@@ -43,6 +43,7 @@ int shmdt(void* addr);
 int shmrm(int id);
 
 float getfps(int frames);
+void sleep(int millis);
 
 int print_us(char* str);
 int print_num(int num);

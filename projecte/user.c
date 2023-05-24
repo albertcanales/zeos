@@ -10,6 +10,7 @@ void update_fps() {
   char fpsstr[10];
   float fps = getfps(frames);
   ftoa(fps*100, fpsstr);
+  gotoxy(0,0);
   write(1, fpsstr, strlen(fpsstr));
   write(1, "\n", 1);
   frames++;
@@ -29,7 +30,7 @@ int head, size;
 int apple_x, apple_y;
 
 int dx[] = {0,-1,0,1};
-int dy[] = {1,0,-1,0};
+int dy[] = {-1,0,1,0};
 
 
 void reader() {
@@ -71,6 +72,11 @@ void paint_snake_pixel(int x, int y) {
   write(1, "O", 1);
 }
 
+void clear_pixel(int x, int y) {
+  gotoxy(x, y);
+  write(1, " ", 1);
+}
+
 void init() {
   ended = 0;
   size = 4;
@@ -78,7 +84,7 @@ void init() {
 
   // Inciar snake
   for (int i = 0; i < MAX_SIZE; i++) {
-    if(i < 4) {
+    if(i < size) {
       snake_x[i] = 40;
       snake_y[i] = 15+i;
     }
@@ -100,17 +106,60 @@ void init() {
   paint_apple();
 }
 
+void move() {
+  // Move snake
+  int old_head_x = snake_x[head];
+  int old_head_y = snake_y[head];
+  int new_head_x = (old_head_x + dx[*direction]);
+  int new_head_y = (old_head_y + dy[*direction]);
+
+  // Check collisions with wall
+  if (new_head_x < 0 || new_head_x >= 80 || new_head_y < 0 || new_head_y >= 25)
+    ended = 1;
+
+  // Check collisions with itself
+  for (int i = 0; i < MAX_SIZE; i++)
+    if (i != head && snake_x[i] == new_head_x && snake_y[i] == new_head_y)
+      ended = 1;
+
+  // Check apples
+  if (new_head_x == apple_x && new_head_y == apple_y) {
+
+    for (int i = size - 1; i > head; i--) {
+      snake_x[i + 1] = snake_x[i];
+      snake_y[i + 1] = snake_y[i];
+    }
+    snake_x[head + 1] = apple_x;
+    snake_y[head + 1] = apple_y;
+
+    size++;
+    paint_apple();
+  }
+
+  // Apply movement
+  if (ended == 0) {
+    head = (head + 1) % size;
+    if (snake_x[head] != apple_x || snake_y[head] != apple_y)
+      clear_pixel(snake_x[head], snake_y[head]);
+    snake_x[head] = new_head_x;
+    snake_y[head] = new_head_y;
+    paint_snake_pixel(snake_x[head], snake_y[head]);
+  }
+
+  // Check win
+  if (size > MAX_SIZE)
+    ended = 1;
+}
+
 void game() {
-  // Initialize snake
+  // Initialize game
   init();
 
+  // Gaming loop
   while(!ended) {
-
-    // Move snake
-    // Check collisions (itself, screen)
-    // Check apples
-    // Wait for tick
-    // Update fps
+    move();
+    sleep(10000);
+    update_fps();
   }
   // Show score screen
 }
