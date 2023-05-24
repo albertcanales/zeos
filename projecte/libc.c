@@ -73,10 +73,10 @@ int print_num(int num) {
 }
 
 float getfps(int frames) {
-  return 18*frames/gettime();
+  return (50*18*frames)/gettime();
 }
 
 void sleep(int millis) {
   int current = gettime();
-  while(gettime() - current < 18*millis/1000);
+  while(gettime() - current < 50*18*millis/1000);
 }

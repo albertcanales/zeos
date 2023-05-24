@@ -10,9 +10,12 @@ void update_fps() {
   char fpsstr[10];
   float fps = getfps(frames);
   ftoa(fps*100, fpsstr);
-  gotoxy(0,0);
+  set_color(15, 3);
+  gotoxy(70,0);
+  for(int i = 0; i < 10; i++)
+    write(1, " ", 1);
+  gotoxy(80-strlen(fpsstr),0);
   write(1, fpsstr, strlen(fpsstr));
-  write(1, "\n", 1);
   frames++;
 }
 
@@ -64,17 +67,28 @@ void paint_apple() {
   apple_x = ((apple_x + 126731) % 80);
   apple_y = ((apple_y + 237891) % 25);
   gotoxy(apple_x, apple_y);
-  write(1, "X", 1);
+  set_color(0, 4);
+  write(1, " ", 1);
 }
 
 void paint_snake_pixel(int x, int y) {
   gotoxy(x, y);
-  write(1, "O", 1);
+  set_color(0, 2);
+  write(1, " ", 1);
 }
 
 void clear_pixel(int x, int y) {
   gotoxy(x, y);
+  set_color(0, 0);
   write(1, " ", 1);
+}
+
+void update_score() {
+  char scorestr[4];
+  itoa(size-4, scorestr);
+  set_color(15,3);
+  gotoxy(7, 0);
+  write(1, scorestr, strlen(scorestr));
 }
 
 void init() {
@@ -98,10 +112,36 @@ void init() {
   for(int i = 0; i < 80*25; i++) {
     write(1, " ", 1);
   }
+
+  // Draw border
+  set_color(15, 3);
+  gotoxy(0,0);
+  for(int x = 0; x < 80; x++)
+    write(1, " ", 1);
+  gotoxy(0,24);
+  for(int x = 0; x < 80; x++)
+    write(1, " ", 1);
+  gotoxy(0,0);
+  for(int y = 0; y < 25; y++) {
+    write(1, "  \n", 3);
+  }
+  for(int y = 0; y < 25; y++) {
+    gotoxy(78,y);
+    write(1, "  ", 2);
+  }
+
+  // Draw fps and score
+  gotoxy(0,0);
+  write(1, "Score: ", 7);
+  update_score();
+  gotoxy(65,0);
+  write(1, "FPS: ", 5);
+
   // Print snake
   for(int i = 0; i < size; i++) {
     paint_snake_pixel(snake_x[i], snake_y[i]);
   }
+
   // Print apple
   paint_apple();
 }
@@ -114,7 +154,7 @@ void move() {
   int new_head_y = (old_head_y + dy[*direction]);
 
   // Check collisions with wall
-  if (new_head_x < 0 || new_head_x >= 80 || new_head_y < 0 || new_head_y >= 25)
+  if (new_head_x < 2 || new_head_x >= 78 || new_head_y < 1 || new_head_y >= 24)
     ended = 1;
 
   // Check collisions with itself
@@ -134,6 +174,7 @@ void move() {
 
     size++;
     paint_apple();
+    update_score();
   }
 
   // Apply movement
@@ -158,7 +199,10 @@ void game() {
   // Gaming loop
   while(!ended) {
     move();
-    sleep(10000);
+    if(*direction % 2 == 0)
+      sleep(200);
+    else
+      sleep(150);
     update_fps();
   }
   // Show score screen
