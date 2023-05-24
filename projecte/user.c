@@ -15,6 +15,14 @@ void update_fps() {
   frames++;
 }
 
+void reader() {
+  while(1);
+}
+
+void game() {
+  while(1);
+}
+
 int __attribute__ ((__section__(".text.main")))
   main(void)
 {
@@ -22,8 +30,10 @@ int __attribute__ ((__section__(".text.main")))
      /* __asm__ __volatile__ ("mov %0, %%cr3"::"r" (0) ); */
 
   
-
-  while(1) {
-    update_fps();
+  if(fork() > 0) {
+    game();
+  }
+  else {
+    reader();
   }
 }
