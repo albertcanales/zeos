@@ -24,7 +24,7 @@ int ended;
 // 0 = up, 1 = left, 2 = down, 3 = right
 int *direction;
 
-#define MAX_SIZE 100
+#define MAX_SIZE 13
 
 int snake_x[MAX_SIZE];
 int snake_y[MAX_SIZE];
@@ -90,59 +90,11 @@ void update_score() {
   write(1, scorestr, strlen(scorestr));
 }
 
-void init() {
-  ended = 0;
-  size = 4;
-  head = 0;
-
-  // Inciar snake
-  for (int i = 0; i < MAX_SIZE; i++) {
-    if(i < size) {
-      snake_x[i] = 40;
-      snake_y[i] = 19+i;
-    }
-    else {
-      snake_x[i] = 0;
-      snake_y[i] = 0;
-    }
-  }
-
-  // Clear screen
+void clear_screen() {
+  set_color(2,0);
   for(int i = 0; i < 80*25; i++) {
     write(1, " ", 1);
   }
-
-  // Draw border
-  set_color(15, 3);
-  gotoxy(0,0);
-  for(int x = 0; x < 80; x++)
-    write(1, " ", 1);
-  gotoxy(0,24);
-  for(int x = 0; x < 80; x++)
-    write(1, " ", 1);
-  gotoxy(0,0);
-  for(int y = 0; y < 25; y++) {
-    write(1, "  \n", 3);
-  }
-  for(int y = 0; y < 25; y++) {
-    gotoxy(78,y);
-    write(1, "  ", 2);
-  }
-
-  // Draw fps and score
-  gotoxy(0,0);
-  write(1, "Score: ", 7);
-  update_score();
-  gotoxy(65,0);
-  write(1, "FPS: ", 5);
-
-  // Print snake
-  for(int i = 0; i < size; i++) {
-    paint_snake_pixel(snake_x[i], snake_y[i]);
-  }
-
-  // Print apple
-  paint_apple();
 }
 
 void move() {
@@ -200,11 +152,91 @@ void move() {
     ended = 1;
 }
 
+void show_score() {
+  char lost[] = "Has perdido, paquete";
+  char segmentation[] = "Segmentation fault";
+  char won[] = "Nah es broma :P, has ganado!";
+  char score[] = "Score: ";
+  char scorestr[10];
+  clear_screen();
+  set_color(4, 0);
+  if(size > MAX_SIZE) {
+    gotoxy((80-strlen(segmentation))/2, 12);
+    write(1, segmentation, strlen(segmentation));
+    sleep(1000);
+    gotoxy((80-strlen(won))/2, 13);
+    write(1, won, strlen(won));
+  }
+  else {
+    itoa(size-4, scorestr);
+    gotoxy((80-strlen(lost))/2, 12);
+    write(1, lost, strlen(lost));
+    gotoxy((80-strlen(score)-strlen(scorestr))/2, 13);
+    write(1, score, strlen(score));
+    write(1, scorestr, strlen(scorestr));
+  }
+}
+
+void init() {
+  ended = 0;
+  size = 4;
+  head = 0;
+
+  // Inciar snake
+  for (int i = 0; i < MAX_SIZE; i++) {
+    if(i < size) {
+      snake_x[i] = 40;
+      snake_y[i] = 19+i;
+    }
+    else {
+      snake_x[i] = 0;
+      snake_y[i] = 0;
+    }
+  }
+
+  // Clear screen
+  clear_screen();
+
+  // Draw border
+  set_color(15, 3);
+  gotoxy(0,0);
+  for(int x = 0; x < 80; x++)
+    write(1, " ", 1);
+  gotoxy(0,24);
+  for(int x = 0; x < 80; x++)
+    write(1, " ", 1);
+  gotoxy(0,0);
+  for(int y = 0; y < 25; y++) {
+    write(1, "  \n", 3);
+  }
+  for(int y = 0; y < 25; y++) {
+    gotoxy(78,y);
+    write(1, "  ", 2);
+  }
+
+  // Draw fps and score
+  gotoxy(0,0);
+  write(1, "Score: ", 7);
+  update_score();
+  gotoxy(65,0);
+  write(1, "FPS: ", 5);
+
+  // Print snake
+  for(int i = 0; i < size; i++) {
+    paint_snake_pixel(snake_x[i], snake_y[i]);
+  }
+
+  // Print apple
+  paint_apple();
+
+  // Dirty hack
+  for(int i = 0; i < 4; i++)
+    move();
+}
+
 void game() {
   // Initialize game
   init();
-  for(int i = 0; i < 4; i++)
-    move(); // dirty hack
 
   // Gaming loop
   while(!ended) {
@@ -217,6 +249,7 @@ void game() {
     // ended = 1;
   }
   // Show score screen
+  show_score();
 }
 
 int __attribute__ ((__section__(".text.main")))
